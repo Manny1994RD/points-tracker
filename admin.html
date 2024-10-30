@@ -155,7 +155,7 @@
                         <th>Acciones</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="userTableBody">
                     <!-- User data will be populated here -->
                 </tbody>
             </table>
@@ -227,15 +227,13 @@
             const usersRef = database.ref('users');
 
             usersRef.once('value', (snapshot) => {
-                const adminUserList = document.getElementById('adminUserList');
-                adminUserList.innerHTML = '';
+                const userTableBody = document.getElementById('userTableBody');
+                userTableBody.innerHTML = '';
 
                 if (!snapshot.exists()) {
                     console.warn("No user data found.");
                     return;
                 }
-
-                console.log("Data snapshot:", snapshot.val());
 
                 snapshot.forEach(userSnapshot => {
                     const user = userSnapshot.val();
@@ -248,7 +246,7 @@
                         <td>${user.points}</td>
                         <td><button onclick="editUser('${userSnapshot.key}')">Editar</button></td>
                     `;
-                    adminUserList.appendChild(row);
+                    userTableBody.appendChild(row);
                 });
                 console.log("Admin data loaded successfully.");
             }).catch(error => {
