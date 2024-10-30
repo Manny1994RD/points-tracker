@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Section</title>
-    <!-- Correctly include Firebase scripts from CDN -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.8/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.8/firebase-database.js"></script>
+    <!-- Firebase App (v9 Compatibility Mode) -->
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-analytics-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <style>
         /* General Styling */
         body {
@@ -162,13 +163,13 @@
     </div>
 
     <script>
-        // Firebase configuration
+        // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDRddA_EeZvCMZS5qQAi4pkYtOR_Xblib8",
             authDomain: "mario-racer.firebaseapp.com",
             databaseURL: "https://mario-racer-default-rtdb.firebaseio.com",
             projectId: "mario-racer",
-            storageBucket: "mario-racer.firebasestorage.app",
+            storageBucket: "mario-racer.appspot.com",
             messagingSenderId: "373143059252",
             appId: "1:373143059252:web:5dc28e804781ff688d8361",
             measurementId: "G-FM47SXM2G0"
