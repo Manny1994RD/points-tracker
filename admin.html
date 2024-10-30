@@ -212,6 +212,7 @@
                 loadAdminData();
             }).catch(error => {
                 console.error("Error al crear el usuario:", error);
+                alert("Error al crear el usuario. Consulte la consola para más detalles.");
             });
         }
 
@@ -237,6 +238,7 @@
                 });
             }).catch(error => {
                 console.error("Error al cargar los datos de administrador:", error);
+                alert("Error al cargar los datos de administrador. Consulte la consola para más detalles.");
             });
         }
 
@@ -255,6 +257,7 @@
                     loadAdminData();
                 }).catch(error => {
                     console.error("Error al actualizar los datos del usuario:", error);
+                    alert("Error al actualizar los datos del usuario. Consulte la consola para más detalles.");
                 });
             }
         }
