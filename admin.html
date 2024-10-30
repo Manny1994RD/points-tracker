@@ -126,7 +126,20 @@
             </div>
             <div class="form-row">
                 <label for="newUserLocation">Ubicación</label>
-                <input type="text" id="newUserLocation" placeholder="Introduce ubicación">
+                <select id="newUserLocation">
+                    <option value="Santiago">Santiago</option>
+                    <option value="Moca">Moca</option>
+                    <option value="La Vega">La Vega</option>
+                    <option value="Puerto Plata">Puerto Plata</option>
+                    <option value="Jarabacoa">Jarabacoa</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label for="newUserGender">Género</label>
+                <select id="newUserGender">
+                    <option value="Male">Masculino</option>
+                    <option value="Female">Femenino</option>
+                </select>
             </div>
             <button onclick="createNewUser()">Crear Nuevo Usuario</button>
 
@@ -135,6 +148,7 @@
                     <tr>
                         <th>Nombre</th>
                         <th>Ubicación</th>
+                        <th>Género</th>
                         <th>Puntos</th>
                         <th>Acciones</th>
                     </tr>
@@ -180,6 +194,7 @@
         function createNewUser() {
             const userName = document.getElementById('newUserName').value;
             const userLocation = document.getElementById('newUserLocation').value;
+            const userGender = document.getElementById('newUserGender').value;
 
             if (!userName) {
                 alert("Por favor, ingrese un nombre.");
@@ -190,6 +205,7 @@
             newUserRef.set({
                 name: userName,
                 location: userLocation,
+                gender: userGender,
                 points: 0
             }).then(() => {
                 alert("Nuevo usuario creado correctamente.");
@@ -213,6 +229,7 @@
                     row.innerHTML = `
                         <td>${user.name}</td>
                         <td>${user.location}</td>
+                        <td>${user.gender}</td>
                         <td>${user.points}</td>
                         <td><button onclick="editUser('${userSnapshot.key}')">Editar</button></td>
                     `;
