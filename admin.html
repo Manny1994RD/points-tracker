@@ -221,8 +221,32 @@
 
         // Editar usuario
         function editUser(userId, currentLocation, currentPoints) {
-            const newLocation = prompt("Ingrese la nueva ubicación:", currentLocation);
-            const newPoints = parseInt(prompt("Ingrese los nuevos puntos:", currentPoints)) || currentPoints;
+            const editFormHtml = `
+                <div class="form-row">
+                    <label for="editUserLocation">Nueva Ubicación</label>
+                    <select id="editUserLocation">
+                        <option value="Santiago" ${currentLocation === 'Santiago' ? 'selected' : ''}>Santiago</option>
+                        <option value="La Vega" ${currentLocation === 'La Vega' ? 'selected' : ''}>La Vega</option>
+                        <option value="Moca" ${currentLocation === 'Moca' ? 'selected' : ''}>Moca</option>
+                        <option value="Puerto Plata" ${currentLocation === 'Puerto Plata' ? 'selected' : ''}>Puerto Plata</option>
+                        <option value="Jarabacoa" ${currentLocation === 'Jarabacoa' ? 'selected' : ''}>Jarabacoa</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label for="editUserPoints">Nuevos Puntos</label>
+                    <input type="number" id="editUserPoints" value="${currentPoints}">
+                </div>
+                <button type="button" onclick="saveUserEdit('${userId}')">Guardar Cambios</button>
+            `;
+
+            const userListBody = document.getElementById('userListBody');
+            userListBody.innerHTML = editFormHtml;
+        }
+
+        // Guardar los cambios del usuario editado
+        function saveUserEdit(userId) {
+            const newLocation = document.getElementById('editUserLocation').value;
+            const newPoints = parseInt(document.getElementById('editUserPoints').value) || 0;
 
             if (!newLocation) {
                 alert("Ubicación no puede estar vacía.");
