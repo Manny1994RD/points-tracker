@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Página Principal de Usuarios</title>
+    <title>Formulario de Puntos y Clasificación</title>
     <!-- Firebase App (Firebase v9 Compatibility Mode) -->
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-analytics-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <style>
         /* General Styling */
@@ -37,6 +36,7 @@
             gap: 15px;
         }
 
+        /* Form Row Styling */
         .form-row {
             display: flex;
             align-items: center;
@@ -51,7 +51,7 @@
             white-space: nowrap;
         }
 
-        input[type="text"], input[type="number"], select {
+        input[type="text"], input[type="number"], input[type="date"], select {
             padding: 10px;
             font-size: 1rem;
             border: 1px solid #ccc;
@@ -77,7 +77,7 @@
             background-color: #0056b3;
         }
 
-        .leaderboard, .user-input {
+        .leaderboard {
             margin-top: 30px;
             padding: 15px;
             background-color: #f8f9fa;
@@ -105,54 +105,77 @@
 </head>
 <body>
     <div class="container">
-        <h1>Usuarios Registrados</h1>
+        <h1>Formulario de Envío de Puntos</h1>
 
-        <!-- User Input Points Section -->
-        <div class="user-input">
-            <h2>Ingresar Puntos</h2>
+        <!-- Formulario -->
+        <form id="pointsForm">
+            <!-- Personal Information -->
             <div class="form-row">
-                <label for="userNameSelect">Seleccionar Usuario</label>
-                <select id="userNameSelect">
-                    <!-- Options will be populated here -->
+                <label for="memberName">Nombre del Miembro</label>
+                <input type="text" id="memberName" placeholder="Introduce tu nombre" required>
+            </div>
+            <div class="form-row">
+                <label for="submissionDate">Fecha</label>
+                <input type="date" id="submissionDate" required>
+            </div>
+            <div class="form-row">
+                <label for="location">Ubicación (Sion)</label>
+                <select id="location">
+                    <option value="Santiago">Santiago</option>
+                    <option value="La Vega">La Vega</option>
+                    <option value="Moca">Moca</option>
+                    <option value="Puerto Plata">Puerto Plata</option>
+                    <option value="Jarabacoa">Jarabacoa</option>
                 </select>
             </div>
-            <div class="form-row">
-                <label for="pointsInput">Puntos</label>
-                <input type="number" id="pointsInput" placeholder="Ingrese los puntos">
-            </div>
-            <button onclick="addPoints()">Añadir Puntos</button>
-        </div>
 
-        <!-- User List -->
-        <div class="user-list">
-            <h2>Lista de Usuarios</h2>
-            <table id="userListTable">
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Ubicación</th>
-                        <th>Género</th>
-                        <th>Puntos</th>
-                    </tr>
-                </thead>
-                <tbody id="userListBody">
-                    <!-- User data will be populated here -->
-                </tbody>
-            </table>
-        </div>
+            <!-- Numeric Input Fields -->
+            <div class="form-row">
+                <label for="simple">SIMPLE (1)</label>
+                <input type="number" id="simple" value="0">
+            </div>
+            <div class="form-row">
+                <label for="significativo">SIGNIFICATIVO (2)</label>
+                <input type="number" id="significativo" value="0">
+            </div>
+            <div class="form-row">
+                <label for="estudio">ESTUDIO (10)</label>
+                <input type="number" id="estudio" value="0">
+            </div>
+            <div class="form-row">
+                <label for="invitados">INVITADOS (50)</label>
+                <input type="number" id="invitados" value="0">
+            </div>
+            <div class="form-row">
+                <label for="bautismo">BAUTISMO (500)</label>
+                <input type="number" id="bautismo" value="0">
+            </div>
+            <div class="form-row">
+                <label for="culto">CULTO (1000)</label>
+                <input type="number" id="culto" value="0">
+            </div>
+
+            <!-- Button to calculate total points -->
+            <button type="button" onclick="calculateTotal()">Calcular Puntos Totales y Guardar</button>
+        </form>
+
+        <!-- Display total points -->
+        <h2>Puntos Totales: <span id="totalPoints">0</span></h2>
 
         <!-- Leaderboard Section -->
         <div class="leaderboard">
-            <h2>Tabla de Liderazgo</h2>
+            <h2>Clasificación de los Mejores 10</h2>
             <table id="leaderboardTable">
                 <thead>
                     <tr>
+                        <th>Posición</th>
                         <th>Nombre</th>
+                        <th>Ubicación</th>
                         <th>Puntos</th>
                     </tr>
                 </thead>
                 <tbody id="leaderboardBody">
-                    <!-- Leaderboard data will be populated here -->
+                    <!-- Rankings will be populated here -->
                 </tbody>
             </table>
         </div>
@@ -175,18 +198,70 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // Function to load users for the main page
-        function loadUsers() {
-            console.log("Loading users for main page...");
+        // Function to calculate total points
+        function calculateTotal() {
+            let total = 0;
+
+            // Parse inputs as integers and handle empty or invalid input as 0
+            const simple = parseInt(document.getElementById('simple').value) || 0;
+            const significativo = parseInt(document.getElementById('significativo').value) || 0;
+            const estudio = parseInt(document.getElementById('estudio').value) || 0;
+            const invitados = parseInt(document.getElementById('invitados').value) || 0;
+            const bautismo = parseInt(document.getElementById('bautismo').value) || 0;
+            const culto = parseInt(document.getElementById('culto').value) || 0;
+
+            // Add points for number input categories
+            total += simple * 1;
+            total += significativo * 2;
+            total += estudio * 10;
+            total += invitados * 50;
+            total += bautismo * 500;
+            total += culto * 1000;
+
+            // Display total points
+            document.getElementById('totalPoints').innerText = total;
+
+            // Save user data
+            saveUserData(total);
+        }
+
+        // Function to save user data and update leaderboard in Firebase
+        function saveUserData(totalPoints) {
+            const name = document.getElementById('memberName').value;
+            const date = document.getElementById('submissionDate').value;
+            const location = document.getElementById('location').value;
+
+            if (!name || !date) {
+                alert("Por favor, complete todos los campos requeridos.");
+                return;
+            }
+
+            // Create user data object
+            const userData = {
+                name: name,
+                date: date,
+                location: location,
+                points: totalPoints
+            };
+
+            // Save user data to Firebase
+            const newUserRef = database.ref('users').push();
+            newUserRef.set(userData).then(() => {
+                alert("Datos del usuario guardados correctamente.");
+                loadLeaderboard();
+            }).catch(error => {
+                console.error("Error al guardar los datos del usuario:", error);
+                alert("Error al guardar los datos del usuario. Consulte la consola para más detalles.");
+            });
+        }
+
+        // Function to load the leaderboard from Firebase
+        function loadLeaderboard() {
+            console.log("Loading leaderboard...");
             const usersRef = database.ref('users');
 
             usersRef.once('value', (snapshot) => {
-                const userListBody = document.getElementById('userListBody');
-                const userNameSelect = document.getElementById('userNameSelect');
                 const leaderboardBody = document.getElementById('leaderboardBody');
-
-                userListBody.innerHTML = '';
-                userNameSelect.innerHTML = '';
                 leaderboardBody.innerHTML = '';
 
                 if (!snapshot.exists()) {
@@ -198,80 +273,34 @@
 
                 snapshot.forEach(userSnapshot => {
                     const user = userSnapshot.val();
-                    console.log("User loaded:", user);
-                    users.push({ ...user, id: userSnapshot.key });
-
-                    // Populate user list table
-                    const userRow = document.createElement('tr');
-                    userRow.innerHTML = `
-                        <td>${user.name}</td>
-                        <td>${user.location}</td>
-                        <td>${user.gender}</td>
-                        <td>${user.points}</td>
-                    `;
-                    userListBody.appendChild(userRow);
-
-                    // Populate user dropdown for adding points
-                    const option = document.createElement('option');
-                    option.value = userSnapshot.key;
-                    option.textContent = user.name;
-                    userNameSelect.appendChild(option);
+                    users.push(user);
                 });
+
+                // Sort users by points in descending order and get the top 10
+                users.sort((a, b) => b.points - a.points);
+                const topUsers = users.slice(0, 10);
 
                 // Populate leaderboard
-                users.sort((a, b) => b.points - a.points); // Sort users by points
-                users.forEach(user => {
-                    const leaderboardRow = document.createElement('tr');
-                    leaderboardRow.innerHTML = `
+                topUsers.forEach((user, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
                         <td>${user.name}</td>
+                        <td>${user.location}</td>
                         <td>${user.points}</td>
                     `;
-                    leaderboardBody.appendChild(leaderboardRow);
+                    leaderboardBody.appendChild(row);
                 });
 
-                console.log("Users and leaderboard loaded successfully.");
+                console.log("Leaderboard loaded successfully.");
             }).catch(error => {
-                console.error("Error loading users for main page:", error);
-                alert("Error al cargar la lista de usuarios. Consulte la consola para más detalles.");
+                console.error("Error loading leaderboard:", error);
+                alert("Error al cargar la tabla de clasificación. Consulte la consola para más detalles.");
             });
         }
 
-        // Function to add points to a user
-        function addPoints() {
-            const userId = document.getElementById('userNameSelect').value;
-            const pointsToAdd = parseInt(document.getElementById('pointsInput').value);
-
-            if (!userId || isNaN(pointsToAdd) || pointsToAdd <= 0) {
-                alert("Seleccione un usuario y agregue puntos válidos.");
-                return;
-            }
-
-            const userRef = database.ref(`users/${userId}`);
-
-            userRef.once('value')
-                .then(snapshot => {
-                    if (snapshot.exists()) {
-                        const currentPoints = snapshot.val().points || 0;
-                        userRef.update({
-                            points: currentPoints + pointsToAdd
-                        }).then(() => {
-                            alert("Puntos añadidos correctamente.");
-                            loadUsers(); // Refresh the user list and leaderboard
-                        }).catch(error => {
-                            console.error("Error al actualizar los puntos:", error);
-                            alert("Error al actualizar los puntos. Consulte la consola para más detalles.");
-                        });
-                    } else {
-                        alert("Usuario no encontrado.");
-                    }
-                }).catch(error => {
-                    console.error("Error al obtener el usuario:", error);
-                    alert("Error al obtener el usuario. Consulte la consola para más detalles.");
-                });
-        }
-
-        // Load users on page load
-        window.onload = loadUsers;
+        // Load leaderboard on page load
+        window.onload = loadLeaderboard;
     </script>
 </body>
 </html>
