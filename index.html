@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Section</title>
-    <!-- Firebase App (v9 Compatibility Mode) -->
+    <title>Página Principal de Usuarios</title>
+    <!-- Firebase App (Firebase v9 Compatibility Mode) -->
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-analytics-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
@@ -77,7 +77,7 @@
             background-color: #0056b3;
         }
 
-        .leaderboard, .admin-section, .admin-login {
+        .user-list {
             margin-top: 30px;
             padding: 15px;
             background-color: #f8f9fa;
@@ -105,57 +105,19 @@
 </head>
 <body>
     <div class="container">
-        <!-- Admin Login Section -->
-        <div class="admin-login">
-            <h2>Admin Login</h2>
-            <div class="form-row">
-                <label for="adminUsername">Username</label>
-                <input type="text" id="adminUsername" placeholder="Username">
-            </div>
-            <div class="form-row">
-                <label for="adminPassword">Password</label>
-                <input type="password" id="adminPassword" placeholder="Password">
-            </div>
-            <button onclick="adminLogin()">Login</button>
-        </div>
-
-        <!-- Admin Section (hidden initially) -->
-        <div class="admin-section" id="adminSection" style="display:none;">
-            <h2>Administración de Usuarios</h2>
-            <div class="form-row">
-                <label for="newUserName">Nombre del Nuevo Usuario</label>
-                <input type="text" id="newUserName" placeholder="Introduce nombre">
-            </div>
-            <div class="form-row">
-                <label for="newUserLocation">Ubicación</label>
-                <select id="newUserLocation">
-                    <option value="Santiago">Santiago</option>
-                    <option value="Moca">Moca</option>
-                    <option value="La Vega">La Vega</option>
-                    <option value="Puerto Plata">Puerto Plata</option>
-                    <option value="Jarabacoa">Jarabacoa</option>
-                </select>
-            </div>
-            <div class="form-row">
-                <label for="newUserGender">Género</label>
-                <select id="newUserGender">
-                    <option value="Male">Masculino</option>
-                    <option value="Female">Femenino</option>
-                </select>
-            </div>
-            <button onclick="createNewUser()">Crear Nuevo Usuario</button>
-
-            <table id="adminUserList">
+        <h1>Usuarios Registrados</h1>
+        <div class="user-list">
+            <h2>Lista de Usuarios</h2>
+            <table id="userListTable">
                 <thead>
                     <tr>
                         <th>Nombre</th>
                         <th>Ubicación</th>
                         <th>Género</th>
                         <th>Puntos</th>
-                        <th>Acciones</th>
                     </tr>
                 </thead>
-                <tbody id="userTableBody">
+                <tbody id="userListBody">
                     <!-- User data will be populated here -->
                 </tbody>
             </table>
@@ -179,56 +141,14 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // Admin login function
-        function adminLogin() {
-            const username = document.getElementById('adminUsername').value;
-            const password = document.getElementById('adminPassword').value;
-
-            if (username === 'admin' && password === '1234') {
-                document.getElementById('adminSection').style.display = 'block';
-                loadAdminData();
-            } else {
-                alert("Credenciales incorrectas.");
-            }
-        }
-
-        // Function to create a new user (admin-only)
-        function createNewUser() {
-            const userName = document.getElementById('newUserName').value.trim();
-            const userLocation = document.getElementById('newUserLocation').value;
-            const userGender = document.getElementById('newUserGender').value;
-
-            if (!userName) {
-                alert("Por favor, ingrese un nombre.");
-                return;
-            }
-
-            console.log("Attempting to create new user:", { userName, userLocation, userGender });
-
-            const newUserRef = database.ref('users').push();
-            newUserRef.set({
-                name: userName,
-                location: userLocation,
-                gender: userGender,
-                points: 0
-            }).then(() => {
-                alert("Nuevo usuario creado correctamente.");
-                console.log("User created successfully:", userName);
-                loadAdminData();
-            }).catch(error => {
-                console.error("Error al crear el usuario:", error);
-                alert("Error al crear el usuario. Consulte la consola para más detalles.");
-            });
-        }
-
-        // Function to load admin data
-        function loadAdminData() {
-            console.log("Loading user data from Firebase...");
+        // Function to load users for the main page
+        function loadUsers() {
+            console.log("Loading users for main page...");
             const usersRef = database.ref('users');
 
             usersRef.once('value', (snapshot) => {
-                const userTableBody = document.getElementById('userTableBody');
-                userTableBody.innerHTML = '';
+                const userListBody = document.getElementById('userListBody');
+                userListBody.innerHTML = '';
 
                 if (!snapshot.exists()) {
                     console.warn("No user data found.");
@@ -244,42 +164,18 @@
                         <td>${user.location}</td>
                         <td>${user.gender}</td>
                         <td>${user.points}</td>
-                        <td><button onclick="editUser('${userSnapshot.key}')">Editar</button></td>
                     `;
-                    userTableBody.appendChild(row);
+                    userListBody.appendChild(row);
                 });
-                console.log("Admin data loaded successfully.");
+                console.log("Users loaded successfully for main page.");
             }).catch(error => {
-                console.error("Error al cargar los datos de administrador:", error);
-                alert("Error al cargar los datos de administrador. Consulte la consola para más detalles.");
+                console.error("Error loading users for main page:", error);
+                alert("Error al cargar la lista de usuarios. Consulte la consola para más detalles.");
             });
         }
 
-        // Function to edit a user (for admin)
-        function editUser(userId) {
-            const newLocation = prompt("Ingrese la nueva ubicación:");
-            const newPoints = parseInt(prompt("Ingrese los nuevos puntos:")) || 0;
-
-            if (!newLocation) {
-                alert("Ubicación no puede estar vacía.");
-                return;
-            }
-
-            console.log(`Updating user ${userId} with location: ${newLocation}, points: ${newPoints}`);
-
-            const userRef = database.ref(`users/${userId}`);
-            userRef.update({
-                location: newLocation,
-                points: newPoints
-            }).then(() => {
-                alert("Datos del usuario actualizados.");
-                console.log("User updated successfully.");
-                loadAdminData();
-            }).catch(error => {
-                console.error("Error al actualizar los datos del usuario:", error);
-                alert("Error al actualizar los datos del usuario. Consulte la consola para más detalles.");
-            });
-        }
+        // Load users on page load
+        window.onload = loadUsers;
     </script>
 </body>
 </html>
