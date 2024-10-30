@@ -187,7 +187,7 @@
             </div>
 
             <!-- Button to calculate total points -->
-            <button type="button" onclick="calculateTotal()">Calcular Puntos Totales y Guardar</button>
+            <button type="button" onclick="confirmSubmission()">Calcular Puntos Totales y Guardar</button>
         </form>
 
         <!-- Display total points -->
@@ -297,12 +297,12 @@
             // Display total points
             document.getElementById('totalPoints').innerText = total;
 
-            // Save user data
-            saveUserData(total);
+            return total;
         }
 
-        // Function to save user data and update leaderboard in Firebase
-        function saveUserData(totalPoints) {
+        // Function to confirm and save user data
+        function confirmSubmission() {
+            const totalPoints = calculateTotal();
             const userId = document.getElementById('memberNameSelect').value;
             const date = document.getElementById('submissionDate').value;
 
@@ -310,6 +310,17 @@
                 alert("Por favor, complete todos los campos requeridos.");
                 return;
             }
+
+            const confirmation = confirm(`Está a punto de enviar los siguientes puntos totales: ${totalPoints}.\n¿Está seguro de que toda la información es correcta?`);
+            if (confirmation) {
+                saveUserData(totalPoints);
+            }
+        }
+
+        // Function to save user data and update leaderboard in Firebase
+        function saveUserData(totalPoints) {
+            const userId = document.getElementById('memberNameSelect').value;
+            const date = document.getElementById('submissionDate').value;
 
             // Update points for existing user
             const userRef = database.ref(`users/${userId}`);
