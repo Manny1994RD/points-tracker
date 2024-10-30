@@ -36,7 +36,6 @@
             gap: 15px;
         }
 
-        /* Form Row Styling */
         .form-row {
             display: flex;
             align-items: center;
@@ -51,7 +50,7 @@
             white-space: nowrap;
         }
 
-        input[type="text"], input[type="number"], input[type="date"], select {
+        input[type="number"], select {
             padding: 10px;
             font-size: 1rem;
             border: 1px solid #ccc;
@@ -101,6 +100,11 @@
             background-color: #007bff;
             color: white;
         }
+
+        .top-scores {
+            font-weight: bold;
+            color: #ff6347;
+        }
     </style>
 </head>
 <body>
@@ -147,34 +151,6 @@
                 <label for="culto">CULTO (1000)</label>
                 <input type="number" id="culto" value="0">
             </div>
-            <div class="form-row">
-                <label for="apacienta">APACIENTA (5)</label>
-                <input type="number" id="apacienta" value="0">
-            </div>
-            <div class="form-row">
-                <label for="firma">FIRMA (10)</label>
-                <input type="number" id="firma" value="0">
-            </div>
-            <div class="form-row">
-                <label for="videoSermon">VIDEO SERMON (10)</label>
-                <input type="number" id="videoSermon" value="0">
-            </div>
-            <div class="form-row">
-                <label for="libroPadre">LIBRO PADRE (10)</label>
-                <input type="number" id="libroPadre" value="0">
-            </div>
-            <div class="form-row">
-                <label for="libroPastor">LIBRO PASTOR (10)</label>
-                <input type="number" id="libroPastor" value="0">
-            </div>
-            <div class="form-row">
-                <label for="ag">FRIMA AG (75)</label>
-                <input type="number" id="ag" value="0">
-            </div>
-            <div class="form-row">
-                <label for="edulms">EDULMS (200)</label>
-                <input type="number" id="edulms" value="0">
-            </div>
 
             <!-- Checkbox Input Fields -->
             <div class="form-row">
@@ -219,17 +195,34 @@
 
         <!-- Leaderboard Section -->
         <div class="leaderboard">
-            <h2>Clasificación de los Mejores 10</h2>
-            <table id="leaderboardTable">
+            <h2>Clasificación de los Mejores 10 - Masculino</h2>
+            <table id="leaderboardTableMale">
                 <thead>
                     <tr>
-                        <th>Posición</th>
-                        <th>Nombre</th>
-                        <th>Ubicación</th>
-                        <th>Puntos</th>
+                        <th>RANK</th>
+                        <th>Top Scores</th>
+                        <th>Top 10 Participants</th>
+                        <th>Top 10 Locations</th>
                     </tr>
                 </thead>
-                <tbody id="leaderboardBody">
+                <tbody id="leaderboardBodyMale">
+                    <!-- Rankings will be populated here -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="leaderboard">
+            <h2>Clasificación de los Mejores 10 - Femenino</h2>
+            <table id="leaderboardTableFemale">
+                <thead>
+                    <tr>
+                        <th>RANK</th>
+                        <th>Top Scores</th>
+                        <th>Top 10 Participants</th>
+                        <th>Top 10 Locations</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboardBodyFemale">
                     <!-- Rankings will be populated here -->
                 </tbody>
             </table>
@@ -282,28 +275,14 @@
             const invitados = parseInt(document.getElementById('invitados').value) || 0;
             const bautismo = parseInt(document.getElementById('bautismo').value) || 0;
             const culto = parseInt(document.getElementById('culto').value) || 0;
-            const apacienta = parseInt(document.getElementById('apacienta').value) || 0;
-            const firma = parseInt(document.getElementById('firma').value) || 0;
-            const videoSermon = parseInt(document.getElementById('videoSermon').value) || 0;
-            const libroPadre = parseInt(document.getElementById('libroPadre').value) || 0;
-            const libroPastor = parseInt(document.getElementById('libroPastor').value) || 0;
-            const ag = parseInt(document.getElementById('ag').value) || 0;
-            const edulms = parseInt(document.getElementById('edulms').value) || 0;
 
             // Add points for number input categories
             total += simple * 1;
             total += significativo * 2;
-            total += estudio * 10; // Corrected to 10
+            total += estudio * 10;
             total += invitados * 50;
             total += bautismo * 500;
             total += culto * 1000;
-            total += apacienta * 5;
-            total += firma * 10;
-            total += videoSermon * 10;
-            total += libroPadre * 10;
-            total += libroPastor * 10;
-            total += ag * 75;
-            total += edulms * 200;
 
             // Add or subtract points based on checkbox selections
             if (document.getElementById('miPaginaCheck').checked) total += 25;
@@ -312,8 +291,8 @@
             if (document.getElementById('diaDePrepararCheck').checked) total += 50;
             if (document.getElementById('cartaMadreCheck').checked) total += 10;
             if (document.getElementById('hongoCheck').checked) total += 500;
-            if (document.getElementById('guienoCheck').checked) total -= 500;  // Subtract 500
-            if (document.getElementById('tortugaRojaCheck').checked) total -= 100;  // Subtract 100
+            if (document.getElementById('guienoCheck').checked) total -= 500;
+            if (document.getElementById('tortugaRojaCheck').checked) total -= 100;
 
             // Display total points
             document.getElementById('totalPoints').innerText = total;
@@ -358,42 +337,61 @@
 
         // Function to load the leaderboard from Firebase
         function loadLeaderboard() {
-            console.log("Loading leaderboard...");
             const usersRef = database.ref('users');
 
             usersRef.once('value', (snapshot) => {
-                const leaderboardBody = document.getElementById('leaderboardBody');
-                leaderboardBody.innerHTML = '';
+                const leaderboardBodyMale = document.getElementById('leaderboardBodyMale');
+                const leaderboardBodyFemale = document.getElementById('leaderboardBodyFemale');
+                leaderboardBodyMale.innerHTML = '';
+                leaderboardBodyFemale.innerHTML = '';
 
                 if (!snapshot.exists()) {
                     console.warn("No user data found.");
                     return;
                 }
 
-                const users = [];
+                const maleUsers = [];
+                const femaleUsers = [];
 
                 snapshot.forEach(userSnapshot => {
                     const user = userSnapshot.val();
-                    users.push(user);
+                    if (user.gender === 'Male') {
+                        maleUsers.push(user);
+                    } else if (user.gender === 'Female') {
+                        femaleUsers.push(user);
+                    }
                 });
 
                 // Sort users by points in descending order and get the top 10
-                users.sort((a, b) => b.points - a.points);
-                const topUsers = users.slice(0, 10);
+                maleUsers.sort((a, b) => b.points - a.points);
+                const topMaleUsers = maleUsers.slice(0, 10);
+                
+                femaleUsers.sort((a, b) => b.points - a.points);
+                const topFemaleUsers = femaleUsers.slice(0, 10);
 
-                // Populate leaderboard
-                topUsers.forEach((user, index) => {
+                // Populate male leaderboard
+                topMaleUsers.forEach((user, index) => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${index + 1}</td>
+                        <td class="top-scores">${user.points}</td>
                         <td>${user.name}</td>
                         <td>${user.location}</td>
-                        <td>${user.points}</td>
                     `;
-                    leaderboardBody.appendChild(row);
+                    leaderboardBodyMale.appendChild(row);
                 });
 
-                console.log("Leaderboard loaded successfully.");
+                // Populate female leaderboard
+                topFemaleUsers.forEach((user, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td class="top-scores">${user.points}</td>
+                        <td>${user.name}</td>
+                        <td>${user.location}</td>
+                    `;
+                    leaderboardBodyFemale.appendChild(row);
+                });
             }).catch(error => {
                 console.error("Error loading leaderboard:", error);
                 alert("Error al cargar la tabla de clasificación. Consulte la consola para más detalles.");
