@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulario de Puntos y Clasificación</title>
-    <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-analytics.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js"></script>
+    <title>Admin Section</title>
+    <!-- Firebase App (v9 Compatibility Mode) -->
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-analytics-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <style>
         /* General Styling */
         body {
@@ -50,7 +51,7 @@
             white-space: nowrap;
         }
 
-        input[type="text"], input[type="number"], input[type="date"], select {
+        input[type="text"], input[type="password"], input[type="number"], select {
             padding: 10px;
             font-size: 1rem;
             border: 1px solid #ccc;
@@ -76,7 +77,7 @@
             background-color: #0056b3;
         }
 
-        .leaderboard {
+        .leaderboard, .admin-section, .admin-login {
             margin-top: 30px;
             padding: 15px;
             background-color: #f8f9fa;
@@ -104,76 +105,71 @@
 </head>
 <body>
     <div class="container">
-        <h1>Formulario de Envío de Puntos</h1>
-        <form id="pointsForm">
-            <!-- Select Existing User -->
+        <!-- Admin Login Section -->
+        <div class="admin-login">
+            <h2>Admin Login</h2>
             <div class="form-row">
-                <label for="userSelect">Seleccione Participante</label>
-                <select id="userSelect">
-                    <option value="">Selecciona un usuario</option>
+                <label for="adminUsername">Username</label>
+                <input type="text" id="adminUsername" placeholder="Username">
+            </div>
+            <div class="form-row">
+                <label for="adminPassword">Password</label>
+                <input type="password" id="adminPassword" placeholder="Password">
+            </div>
+            <button onclick="adminLogin()">Login</button>
+        </div>
+
+        <!-- Admin Section (hidden initially) -->
+        <div class="admin-section" id="adminSection" style="display:none;">
+            <h2>Administración de Usuarios</h2>
+            <div class="form-row">
+                <label for="newUserName">Nombre del Nuevo Usuario</label>
+                <input type="text" id="newUserName" placeholder="Introduce nombre">
+            </div>
+            <div class="form-row">
+                <label for="newUserLocation">Ubicación</label>
+                <select id="newUserLocation">
+                    <option value="Santiago">Santiago</option>
+                    <option value="Moca">Moca</option>
+                    <option value="La Vega">La Vega</option>
+                    <option value="Puerto Plata">Puerto Plata</option>
+                    <option value="Jarabacoa">Jarabacoa</option>
                 </select>
             </div>
+            <div class="form-row">
+                <label for="newUserGender">Género</label>
+                <select id="newUserGender">
+                    <option value="Male">Masculino</option>
+                    <option value="Female">Femenino</option>
+                </select>
+            </div>
+            <button onclick="createNewUser()">Crear Nuevo Usuario</button>
 
-            <!-- Numeric Input Fields -->
-            <div class="form-row">
-                <label for="simple">SIMPLE (1)</label>
-                <input type="number" id="simple" value="0">
-            </div>
-            <div class="form-row">
-                <label for="significativo">SIGNIFICATIVO (2)</label>
-                <input type="number" id="significativo" value="0">
-            </div>
-            <div class="form-row">
-                <label for="estudio">ESTUDIO (10)</label>
-                <input type="number" id="estudio" value="0">
-            </div>
-            <div class="form-row">
-                <label for="invitados">INVITADOS (50)</label>
-                <input type="number" id="invitados" value="0">
-            </div>
-            <div class="form-row">
-                <label for="bautismo">BAUTISMO (500)</label>
-                <input type="number" id="bautismo" value="0">
-            </div>
-            <div class="form-row">
-                <label for="culto">CULTO (1000)</label>
-                <input type="number" id="culto" value="0">
-            </div>
-
-            <!-- Button to calculate total points -->
-            <button type="button" onclick="calculateTotal()">Calcular Puntos Totales y Guardar</button>
-        </form>
-
-        <!-- Display total points -->
-        <h2>Puntos Totales: <span id="totalPoints">0</span></h2>
-
-        <!-- Leaderboard Section -->
-        <div class="leaderboard">
-            <h2>Clasificación de los Mejores 10</h2>
-            <table id="leaderboardTable">
+            <table id="adminUserList">
                 <thead>
                     <tr>
-                        <th>Posición</th>
                         <th>Nombre</th>
                         <th>Ubicación</th>
+                        <th>Género</th>
                         <th>Puntos</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
-                <tbody id="leaderboardBody">
-                    <!-- Rankings will be populated here -->
+                <tbody id="userTableBody">
+                    <!-- User data will be populated here -->
                 </tbody>
             </table>
         </div>
     </div>
 
     <script>
-        // Firebase configuration
+        // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDRddA_EeZvCMZS5qQAi4pkYtOR_Xblib8",
             authDomain: "mario-racer.firebaseapp.com",
             databaseURL: "https://mario-racer-default-rtdb.firebaseio.com",
             projectId: "mario-racer",
-            storageBucket: "mario-racer.firebasestorage.app",
+            storageBucket: "mario-racer.appspot.com",
             messagingSenderId: "373143059252",
             appId: "1:373143059252:web:5dc28e804781ff688d8361",
             measurementId: "G-FM47SXM2G0"
@@ -183,115 +179,107 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // Function to update the user list dropdown
-        function updateUserList() {
-            const usersRef = database.ref('users');
-            usersRef.once('value', (snapshot) => {
-                const userSelect = document.getElementById('userSelect');
-                userSelect.innerHTML = '<option value="">Selecciona un usuario</option>';
+        // Admin login function
+        function adminLogin() {
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
 
-                snapshot.forEach(userSnapshot => {
-                    const user = userSnapshot.val();
-                    const option = document.createElement('option');
-                    option.value = userSnapshot.key;
-                    option.text = user.name;
-                    userSelect.appendChild(option);
-                });
-            }).catch(error => {
-                console.error("Error al obtener la lista de usuarios:", error);
-            });
-        }
-
-        // Function to calculate total points and save for existing user
-        function calculateTotal() {
-            let total = 0;
-
-            // Parse inputs as integers and handle empty or invalid input as 0
-            const simple = parseInt(document.getElementById('simple').value) || 0;
-            const significativo = parseInt(document.getElementById('significativo').value) || 0;
-            const estudio = parseInt(document.getElementById('estudio').value) || 0;
-            const invitados = parseInt(document.getElementById('invitados').value) || 0;
-            const bautismo = parseInt(document.getElementById('bautismo').value) || 0;
-            const culto = parseInt(document.getElementById('culto').value) || 0;
-
-            // Add points for number input categories
-            total += simple * 1;
-            total += significativo * 2;
-            total += estudio * 10;
-            total += invitados * 50;
-            total += bautismo * 500;
-            total += culto * 1000;
-
-            // Display total points
-            document.getElementById('totalPoints').innerText = total;
-
-            // Save user data
-            const userId = document.getElementById('userSelect').value;
-            if (userId) {
-                saveUserData(userId, total);
+            if (username === 'admin' && password === '1234') {
+                document.getElementById('adminSection').style.display = 'block';
+                loadAdminData();
             } else {
-                alert("Por favor, seleccione un usuario.");
+                alert("Credenciales incorrectas.");
             }
         }
 
-        // Function to save user data and update leaderboard
-        function saveUserData(userId, totalPoints) {
-            const userRef = database.ref(`users/${userId}`);
-            userRef.once('value', (snapshot) => {
-                if (snapshot.exists()) {
-                    const userData = snapshot.val();
-                    const updatedPoints = userData.points + totalPoints;
+        // Function to create a new user (admin-only)
+        function createNewUser() {
+            const userName = document.getElementById('newUserName').value.trim();
+            const userLocation = document.getElementById('newUserLocation').value;
+            const userGender = document.getElementById('newUserGender').value;
 
-                    userRef.update({
-                        points: updatedPoints
-                    }).then(() => {
-                        alert("Puntos actualizados correctamente.");
-                        updateLeaderboard();
-                    }).catch(error => {
-                        console.error("Error al actualizar los puntos:", error);
-                    });
-                }
+            if (!userName) {
+                alert("Por favor, ingrese un nombre.");
+                return;
+            }
+
+            console.log("Attempting to create new user:", { userName, userLocation, userGender });
+
+            const newUserRef = database.ref('users').push();
+            newUserRef.set({
+                name: userName,
+                location: userLocation,
+                gender: userGender,
+                points: 0
+            }).then(() => {
+                alert("Nuevo usuario creado correctamente.");
+                console.log("User created successfully:", userName);
+                loadAdminData();
             }).catch(error => {
-                console.error("Error al obtener los datos del usuario:", error);
+                console.error("Error al crear el usuario:", error);
+                alert("Error al crear el usuario. Consulte la consola para más detalles.");
             });
         }
 
-        // Function to update leaderboard
-        function updateLeaderboard() {
-            const usersRef = database.ref('users').orderByChild('points').limitToLast(10);
+        // Function to load admin data
+        function loadAdminData() {
+            console.log("Loading user data from Firebase...");
+            const usersRef = database.ref('users');
 
             usersRef.once('value', (snapshot) => {
-                const leaderboardBody = document.getElementById('leaderboardBody');
-                leaderboardBody.innerHTML = '';
+                const userTableBody = document.getElementById('userTableBody');
+                userTableBody.innerHTML = '';
 
-                const usersArray = [];
+                if (!snapshot.exists()) {
+                    console.warn("No user data found.");
+                    return;
+                }
+
                 snapshot.forEach(userSnapshot => {
-                    usersArray.push(userSnapshot.val());
-                });
-
-                // Sort usersArray in descending order of points
-                usersArray.sort((a, b) => b.points - a.points);
-
-                usersArray.forEach((user, index) => {
+                    const user = userSnapshot.val();
+                    console.log("User loaded:", user);
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td>${index + 1}</td>
                         <td>${user.name}</td>
                         <td>${user.location}</td>
+                        <td>${user.gender}</td>
                         <td>${user.points}</td>
+                        <td><button onclick="editUser('${userSnapshot.key}')">Editar</button></td>
                     `;
-                    leaderboardBody.appendChild(row);
+                    userTableBody.appendChild(row);
                 });
+                console.log("Admin data loaded successfully.");
             }).catch(error => {
-                console.error("Error al obtener los datos:", error);
+                console.error("Error al cargar los datos de administrador:", error);
+                alert("Error al cargar los datos de administrador. Consulte la consola para más detalles.");
             });
         }
 
-        // Initialize leaderboard and user list on page load
-        window.onload = function() {
-            updateUserList();
-            updateLeaderboard();
-        };
+        // Function to edit a user (for admin)
+        function editUser(userId) {
+            const newLocation = prompt("Ingrese la nueva ubicación:");
+            const newPoints = parseInt(prompt("Ingrese los nuevos puntos:")) || 0;
+
+            if (!newLocation) {
+                alert("Ubicación no puede estar vacía.");
+                return;
+            }
+
+            console.log(`Updating user ${userId} with location: ${newLocation}, points: ${newPoints}`);
+
+            const userRef = database.ref(`users/${userId}`);
+            userRef.update({
+                location: newLocation,
+                points: newPoints
+            }).then(() => {
+                alert("Datos del usuario actualizados.");
+                console.log("User updated successfully.");
+                loadAdminData();
+            }).catch(error => {
+                console.error("Error al actualizar los datos del usuario:", error);
+                alert("Error al actualizar los datos del usuario. Consulte la consola para más detalles.");
+            });
+        }
     </script>
 </body>
 </html>
