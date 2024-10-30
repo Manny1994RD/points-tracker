@@ -111,22 +111,15 @@
         <form id="pointsForm">
             <!-- Personal Information -->
             <div class="form-row">
-                <label for="memberName">Nombre del Miembro</label>
-                <input type="text" id="memberName" placeholder="Introduce tu nombre" required>
+                <label for="memberNameSelect">Seleccionar Miembro</label>
+                <select id="memberNameSelect">
+                    <option value="">Seleccionar miembro</option>
+                    <!-- Existing users will be populated here -->
+                </select>
             </div>
             <div class="form-row">
                 <label for="submissionDate">Fecha</label>
                 <input type="date" id="submissionDate" required>
-            </div>
-            <div class="form-row">
-                <label for="location">Ubicación (Sion)</label>
-                <select id="location">
-                    <option value="Santiago">Santiago</option>
-                    <option value="La Vega">La Vega</option>
-                    <option value="Moca">Moca</option>
-                    <option value="Puerto Plata">Puerto Plata</option>
-                    <option value="Jarabacoa">Jarabacoa</option>
-                </select>
             </div>
 
             <!-- Numeric Input Fields -->
@@ -153,6 +146,68 @@
             <div class="form-row">
                 <label for="culto">CULTO (1000)</label>
                 <input type="number" id="culto" value="0">
+            </div>
+            <div class="form-row">
+                <label for="apacienta">APACIENTA (5)</label>
+                <input type="number" id="apacienta" value="0">
+            </div>
+            <div class="form-row">
+                <label for="firma">FIRMA (10)</label>
+                <input type="number" id="firma" value="0">
+            </div>
+            <div class="form-row">
+                <label for="videoSermon">VIDEO SERMON (10)</label>
+                <input type="number" id="videoSermon" value="0">
+            </div>
+            <div class="form-row">
+                <label for="libroPadre">LIBRO PADRE (10)</label>
+                <input type="number" id="libroPadre" value="0">
+            </div>
+            <div class="form-row">
+                <label for="libroPastor">LIBRO PASTOR (10)</label>
+                <input type="number" id="libroPastor" value="0">
+            </div>
+            <div class="form-row">
+                <label for="ag">FRIMA AG (75)</label>
+                <input type="number" id="ag" value="0">
+            </div>
+            <div class="form-row">
+                <label for="edulms">EDULMS (200)</label>
+                <input type="number" id="edulms" value="0">
+            </div>
+
+            <!-- Checkbox Input Fields -->
+            <div class="form-row">
+                <label for="miPaginaCheck">MI PÁGINA (25)</label>
+                <input type="checkbox" id="miPaginaCheck">
+            </div>
+            <div class="form-row">
+                <label for="prayDailyCheck">ORACIÓN DIARIA (25)</label>
+                <input type="checkbox" id="prayDailyCheck">
+            </div>
+            <div class="form-row">
+                <label for="offlineEduCheck">OFFLINE EDU (50)</label>
+                <input type="checkbox" id="offlineEduCheck">
+            </div>
+            <div class="form-row">
+                <label for="diaDePrepararCheck">DÍA DE PREPARAR (50)</label>
+                <input type="checkbox" id="diaDePrepararCheck">
+            </div>
+            <div class="form-row">
+                <label for="cartaMadreCheck">CARTA A MADRE (10)</label>
+                <input type="checkbox" id="cartaMadreCheck">
+            </div>
+            <div class="form-row">
+                <label for="hongoCheck">HONGO (500)</label>
+                <input type="checkbox" id="hongoCheck">
+            </div>
+            <div class="form-row">
+                <label for="guienoCheck">GUIENO (-500)</label>
+                <input type="checkbox" id="guienoCheck">
+            </div>
+            <div class="form-row">
+                <label for="tortugaRojaCheck">TORTUGA ROJA (-100)</label>
+                <input type="checkbox" id="tortugaRojaCheck">
             </div>
 
             <!-- Button to calculate total points -->
@@ -198,6 +253,24 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
+        // Load existing users into the dropdown
+        function loadExistingUsers() {
+            const memberNameSelect = document.getElementById('memberNameSelect');
+            memberNameSelect.innerHTML = '<option value="">Seleccionar miembro</option>'; // Reset options
+
+            database.ref('users').once('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    snapshot.forEach(userSnapshot => {
+                        const user = userSnapshot.val();
+                        const option = document.createElement('option');
+                        option.value = userSnapshot.key;
+                        option.textContent = `${user.name} - ${user.location}`;
+                        memberNameSelect.appendChild(option);
+                    });
+                }
+            });
+        }
+
         // Function to calculate total points
         function calculateTotal() {
             let total = 0;
@@ -209,14 +282,38 @@
             const invitados = parseInt(document.getElementById('invitados').value) || 0;
             const bautismo = parseInt(document.getElementById('bautismo').value) || 0;
             const culto = parseInt(document.getElementById('culto').value) || 0;
+            const apacienta = parseInt(document.getElementById('apacienta').value) || 0;
+            const firma = parseInt(document.getElementById('firma').value) || 0;
+            const videoSermon = parseInt(document.getElementById('videoSermon').value) || 0;
+            const libroPadre = parseInt(document.getElementById('libroPadre').value) || 0;
+            const libroPastor = parseInt(document.getElementById('libroPastor').value) || 0;
+            const ag = parseInt(document.getElementById('ag').value) || 0;
+            const edulms = parseInt(document.getElementById('edulms').value) || 0;
 
             // Add points for number input categories
             total += simple * 1;
             total += significativo * 2;
-            total += estudio * 10;
+            total += estudio * 10; // Corrected to 10
             total += invitados * 50;
             total += bautismo * 500;
             total += culto * 1000;
+            total += apacienta * 5;
+            total += firma * 10;
+            total += videoSermon * 10;
+            total += libroPadre * 10;
+            total += libroPastor * 10;
+            total += ag * 75;
+            total += edulms * 200;
+
+            // Add or subtract points based on checkbox selections
+            if (document.getElementById('miPaginaCheck').checked) total += 25;
+            if (document.getElementById('prayDailyCheck').checked) total += 25;
+            if (document.getElementById('offlineEduCheck').checked) total += 50;
+            if (document.getElementById('diaDePrepararCheck').checked) total += 50;
+            if (document.getElementById('cartaMadreCheck').checked) total += 10;
+            if (document.getElementById('hongoCheck').checked) total += 500;
+            if (document.getElementById('guienoCheck').checked) total -= 500;  // Subtract 500
+            if (document.getElementById('tortugaRojaCheck').checked) total -= 100;  // Subtract 100
 
             // Display total points
             document.getElementById('totalPoints').innerText = total;
@@ -227,31 +324,35 @@
 
         // Function to save user data and update leaderboard in Firebase
         function saveUserData(totalPoints) {
-            const name = document.getElementById('memberName').value;
+            const userId = document.getElementById('memberNameSelect').value;
             const date = document.getElementById('submissionDate').value;
-            const location = document.getElementById('location').value;
 
-            if (!name || !date) {
+            if (!userId || !date) {
                 alert("Por favor, complete todos los campos requeridos.");
                 return;
             }
 
-            // Create user data object
-            const userData = {
-                name: name,
-                date: date,
-                location: location,
-                points: totalPoints
-            };
+            // Update points for existing user
+            const userRef = database.ref(`users/${userId}`);
 
-            // Save user data to Firebase
-            const newUserRef = database.ref('users').push();
-            newUserRef.set(userData).then(() => {
-                alert("Datos del usuario guardados correctamente.");
-                loadLeaderboard();
+            userRef.once('value').then(snapshot => {
+                if (snapshot.exists()) {
+                    const currentPoints = snapshot.val().points || 0;
+                    userRef.update({
+                        points: currentPoints + totalPoints
+                    }).then(() => {
+                        alert("Puntos añadidos correctamente.");
+                        loadLeaderboard(); // Refresh leaderboard
+                    }).catch(error => {
+                        console.error("Error al actualizar los puntos:", error);
+                        alert("Error al actualizar los puntos. Consulte la consola para más detalles.");
+                    });
+                } else {
+                    alert("Usuario no encontrado.");
+                }
             }).catch(error => {
-                console.error("Error al guardar los datos del usuario:", error);
-                alert("Error al guardar los datos del usuario. Consulte la consola para más detalles.");
+                console.error("Error al obtener el usuario:", error);
+                alert("Error al obtener el usuario. Consulte la consola para más detalles.");
             });
         }
 
@@ -299,8 +400,11 @@
             });
         }
 
-        // Load leaderboard on page load
-        window.onload = loadLeaderboard;
+        // Load existing users and leaderboard on page load
+        window.onload = function() {
+            loadExistingUsers();
+            loadLeaderboard();
+        };
     </script>
 </body>
 </html>
