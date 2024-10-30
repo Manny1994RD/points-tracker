@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Section</title>
+    <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js"></script>
+    <style>
+        /* General Styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .form-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: nowrap;
+        }
+
+        label {
+            font-size: 1rem;
+            color: #555;
+            flex: 1;
+            white-space: nowrap;
+        }
+
+        input[type="text"], input[type="password"], input[type="number"], select {
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 40%;
+            flex: 1;
+        }
+
+        button {
+            padding: 15px;
+            font-size: 1rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .leaderboard, .admin-section, .admin-login {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+            text-align: center;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Admin Login Section -->
+        <div class="admin-login">
+            <h2>Admin Login</h2>
+            <div class="form-row">
+                <label for="adminUsername">Username</label>
+                <input type="text" id="adminUsername" placeholder="Username">
+            </div>
+            <div class="form-row">
+                <label for="adminPassword">Password</label>
+                <input type="password" id="adminPassword" placeholder="Password">
+            </div>
+            <button onclick="adminLogin()">Login</button>
+        </div>
+
+        <!-- Admin Section (hidden initially) -->
+        <div class="admin-section" id="adminSection" style="display:none;">
+            <h2>Administración de Usuarios</h2>
+            <div class="form-row">
+                <label for="newUserName">Nombre del Nuevo Usuario</label>
+                <input type="text" id="newUserName" placeholder="Introduce nombre">
+            </div>
+            <div class="form-row">
+                <label for="newUserLocation">Ubicación</label>
+                <input type="text" id="newUserLocation" placeholder="Introduce ubicación">
+            </div>
+            <button onclick="createNewUser()">Crear Nuevo Usuario</button>
+
+            <table id="adminUserList">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Ubicación</th>
+                        <th>Puntos</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- User data will be populated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDRddA_EeZvCMZS5qQAi4pkYtOR_Xblib8",
+            authDomain: "mario-racer.firebaseapp.com",
+            databaseURL: "https://mario-racer-default-rtdb.firebaseio.com",
+            projectId: "mario-racer",
+            storageBucket: "mario-racer.firebasestorage.app",
+            messagingSenderId: "373143059252",
+            appId: "1:373143059252:web:5dc28e804781ff688d8361",
+            measurementId: "G-FM47SXM2G0"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Admin login function
+        function adminLogin() {
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
+
+            if (username === 'admin' && password === '1234') {
+                document.getElementById('adminSection').style.display = 'block';
+                loadAdminData();
+            } else {
+                alert("Credenciales incorrectas.");
+            }
+        }
+
+        // Function to create a new user (admin-only)
+        function createNewUser() {
+            const userName = document.getElementById('newUserName').value;
+            const userLocation = document.getElementById('newUserLocation').value;
+
+            if (!userName) {
+                alert("Por favor, ingrese un nombre.");
+                return;
+            }
+
+            const newUserRef = database.ref('users').push();
+            newUserRef.set({
+                name: userName,
+                location: userLocation,
+                points: 0
+            }).then(() => {
+                alert("Nuevo usuario creado correctamente.");
+                loadAdminData();
+            }).catch(error => {
+                console.error("Error al crear el usuario:", error);
+            });
+        }
+
+        // Function to load admin data
+        function loadAdminData() {
+            const usersRef = database.ref('users');
+
+            usersRef.once('value', (snapshot) => {
+                const adminUserList = document.getElementById('adminUserList');
+                adminUserList.innerHTML = '';
+
+                snapshot.forEach(userSnapshot => {
+                    const user = userSnapshot.val();
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${user.name}</td>
+                        <td>${user.location}</td>
+                        <td>${user.points}</td>
+                        <td><button onclick="editUser('${userSnapshot.key}')">Editar</button></td>
+                    `;
+                    adminUserList.appendChild(row);
+                });
+            }).catch(error => {
+                console.error("Error al cargar los datos de administrador:", error);
+            });
+        }
+
+        // Function to edit a user (for admin)
+        function editUser(userId) {
+            const newLocation = prompt("Ingrese la nueva ubicación:");
+            const newPoints = parseInt(prompt("Ingrese los nuevos puntos:")) || 0;
+
+            if (newLocation) {
+                const userRef = database.ref(`users/${userId}`);
+                userRef.update({
+                    location: newLocation,
+                    points: newPoints
+                }).then(() => {
+                    alert("Datos del usuario actualizados.");
+                    loadAdminData();
+                }).catch(error => {
+                    console.error("Error al actualizar los datos del usuario:", error);
+                });
+            }
+        }
+    </script>
+</body>
+</html>
