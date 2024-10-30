@@ -1,64 +1,285 @@
-// Function to create a new user (admin-only)
-function createNewUser() {
-    const userName = document.getElementById('newUserName').value.trim();
-    const userLocation = document.getElementById('newUserLocation').value;
-    const userGender = document.getElementById('newUserGender').value;
-
-    if (!userName) {
-        alert("Por favor, ingrese un nombre.");
-        return;
-    }
-
-    console.log("Attempting to create new user:", { userName, userLocation, userGender });
-
-    const newUserRef = database.ref('users').push();
-    newUserRef.set({
-        name: userName,
-        location: userLocation,
-        gender: userGender,
-        points: 0
-    }).then(() => {
-        alert("Nuevo usuario creado correctamente.");
-        console.log("User created successfully:", userName);
-        loadAdminData();
-    }).catch(error => {
-        console.error("Error al crear el usuario:", error);
-        alert("Error al crear el usuario. Consulte la consola para más detalles.");
-    });
-}
-
-// Function to load admin data
-function loadAdminData() {
-    console.log("Loading user data from Firebase...");
-    const usersRef = database.ref('users');
-
-    usersRef.once('value', (snapshot) => {
-        const adminUserList = document.getElementById('adminUserList');
-        adminUserList.innerHTML = '';
-
-        if (!snapshot.exists()) {
-            console.warn("No user data found.");
-            return;
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Section</title>
+    <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js"></script>
+    <style>
+        /* General Styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
         }
 
-        console.log("Data snapshot:", snapshot.val());
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
 
-        snapshot.forEach(userSnapshot => {
-            const user = userSnapshot.val();
-            console.log("User loaded:", user);
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${user.name}</td>
-                <td>${user.location}</td>
-                <td>${user.gender}</td>
-                <td>${user.points}</td>
-                <td><button onclick="editUser('${userSnapshot.key}')">Editar</button></td>
-            `;
-            adminUserList.appendChild(row);
-        });
-        console.log("Admin data loaded successfully.");
-    }).catch(error => {
-        console.error("Error al cargar los datos de administrador:", error);
-        alert("Error al cargar los datos de administrador. Consulte la consola para más detalles.");
-    });
-}
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .form-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: nowrap;
+        }
+
+        label {
+            font-size: 1rem;
+            color: #555;
+            flex: 1;
+            white-space: nowrap;
+        }
+
+        input[type="text"], input[type="password"], input[type="number"], select {
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 40%;
+            flex: 1;
+        }
+
+        button {
+            padding: 15px;
+            font-size: 1rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .leaderboard, .admin-section, .admin-login {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+            text-align: center;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Admin Login Section -->
+        <div class="admin-login">
+            <h2>Admin Login</h2>
+            <div class="form-row">
+                <label for="adminUsername">Username</label>
+                <input type="text" id="adminUsername" placeholder="Username">
+            </div>
+            <div class="form-row">
+                <label for="adminPassword">Password</label>
+                <input type="password" id="adminPassword" placeholder="Password">
+            </div>
+            <button onclick="adminLogin()">Login</button>
+        </div>
+
+        <!-- Admin Section (hidden initially) -->
+        <div class="admin-section" id="adminSection" style="display:none;">
+            <h2>Administración de Usuarios</h2>
+            <div class="form-row">
+                <label for="newUserName">Nombre del Nuevo Usuario</label>
+                <input type="text" id="newUserName" placeholder="Introduce nombre">
+            </div>
+            <div class="form-row">
+                <label for="newUserLocation">Ubicación</label>
+                <select id="newUserLocation">
+                    <option value="Santiago">Santiago</option>
+                    <option value="Moca">Moca</option>
+                    <option value="La Vega">La Vega</option>
+                    <option value="Puerto Plata">Puerto Plata</option>
+                    <option value="Jarabacoa">Jarabacoa</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label for="newUserGender">Género</label>
+                <select id="newUserGender">
+                    <option value="Male">Masculino</option>
+                    <option value="Female">Femenino</option>
+                </select>
+            </div>
+            <button onclick="createNewUser()">Crear Nuevo Usuario</button>
+
+            <table id="adminUserList">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Ubicación</th>
+                        <th>Género</th>
+                        <th>Puntos</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- User data will be populated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDRddA_EeZvCMZS5qQAi4pkYtOR_Xblib8",
+            authDomain: "mario-racer.firebaseapp.com",
+            databaseURL: "https://mario-racer-default-rtdb.firebaseio.com",
+            projectId: "mario-racer",
+            storageBucket: "mario-racer.firebasestorage.app",
+            messagingSenderId: "373143059252",
+            appId: "1:373143059252:web:5dc28e804781ff688d8361",
+            measurementId: "G-FM47SXM2G0"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Admin login function
+        function adminLogin() {
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
+
+            if (username === 'admin' && password === '1234') {
+                document.getElementById('adminSection').style.display = 'block';
+                loadAdminData();
+            } else {
+                alert("Credenciales incorrectas.");
+            }
+        }
+
+        // Function to create a new user (admin-only)
+        function createNewUser() {
+            const userName = document.getElementById('newUserName').value.trim();
+            const userLocation = document.getElementById('newUserLocation').value;
+            const userGender = document.getElementById('newUserGender').value;
+
+            if (!userName) {
+                alert("Por favor, ingrese un nombre.");
+                return;
+            }
+
+            console.log("Attempting to create new user:", { userName, userLocation, userGender });
+
+            const newUserRef = database.ref('users').push();
+            newUserRef.set({
+                name: userName,
+                location: userLocation,
+                gender: userGender,
+                points: 0
+            }).then(() => {
+                alert("Nuevo usuario creado correctamente.");
+                console.log("User created successfully:", userName);
+                loadAdminData();
+            }).catch(error => {
+                console.error("Error al crear el usuario:", error);
+                alert("Error al crear el usuario. Consulte la consola para más detalles.");
+            });
+        }
+
+        // Function to load admin data
+        function loadAdminData() {
+            console.log("Loading user data from Firebase...");
+            const usersRef = database.ref('users');
+
+            usersRef.once('value', (snapshot) => {
+                const adminUserList = document.getElementById('adminUserList');
+                adminUserList.innerHTML = '';
+
+                if (!snapshot.exists()) {
+                    console.warn("No user data found.");
+                    return;
+                }
+
+                console.log("Data snapshot:", snapshot.val());
+
+                snapshot.forEach(userSnapshot => {
+                    const user = userSnapshot.val();
+                    console.log("User loaded:", user);
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${user.name}</td>
+                        <td>${user.location}</td>
+                        <td>${user.gender}</td>
+                        <td>${user.points}</td>
+                        <td><button onclick="editUser('${userSnapshot.key}')">Editar</button></td>
+                    `;
+                    adminUserList.appendChild(row);
+                });
+                console.log("Admin data loaded successfully.");
+            }).catch(error => {
+                console.error("Error al cargar los datos de administrador:", error);
+                alert("Error al cargar los datos de administrador. Consulte la consola para más detalles.");
+            });
+        }
+
+        // Function to edit a user (for admin)
+        function editUser(userId) {
+            const newLocation = prompt("Ingrese la nueva ubicación:");
+            const newPoints = parseInt(prompt("Ingrese los nuevos puntos:")) || 0;
+
+            if (!newLocation) {
+                alert("Ubicación no puede estar vacía.");
+                return;
+            }
+
+            console.log(`Updating user ${userId} with location: ${newLocation}, points: ${newPoints}`);
+
+            const userRef = database.ref(`users/${userId}`);
+            userRef.update({
+                location: newLocation,
+                points: newPoints
+            }).then(() => {
+                alert("Datos del usuario actualizados.");
+                console.log("User updated successfully.");
+                loadAdminData();
+            }).catch(error => {
+                console.error("Error al actualizar los datos del usuario:", error);
+                alert("Error al actualizar los datos del usuario. Consulte la consola para más detalles.");
+            });
+        }
+    </script>
+</body>
+</html>
