@@ -24,6 +24,101 @@
         .report-tab:hover {
             background-color: #218838;
         }
+
+        /* Container Styling */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        /* General Styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .form-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: nowrap;
+        }
+
+        label {
+            font-size: 1rem;
+            color: #555;
+            flex: 1;
+            white-space: nowrap;
+        }
+
+        input[type="text"], input[type="number"], select {
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 60%;
+            flex: 1;
+        }
+
+        button {
+            padding: 15px;
+            font-size: 1rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .user-list {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+            text-align: center;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -139,7 +234,7 @@
                             <td>${user.location}</td>
                             <td>${user.gender}</td>
                             <td>${user.points}</td>
-                            <td><button onclick="editUser('${userSnapshot.key}', '${user.location}', ${user.points})">Editar</button></td>
+                            <td><button onclick="editUser('${userSnapshot.key}', '${user.name}', '${user.location}', ${user.points})">Editar</button></td>
                             <td><button onclick="deleteUser('${userSnapshot.key}')">Eliminar</button></td>
                         `;
                         userListBody.appendChild(row);
@@ -149,9 +244,13 @@
         }
 
         // Editar usuario
-        function editUser(userId, currentLocation, currentPoints) {
-            const userRow = document.querySelector(`button[onclick="editUser('${userId}', '${currentLocation}', ${currentPoints})"]`).closest('tr');
+        function editUser(userId, currentName, currentLocation, currentPoints) {
+            const userRow = document.querySelector(`button[onclick="editUser('${userId}', '${currentName}', '${currentLocation}', ${currentPoints})"]`).closest('tr');
             const editFormHtml = `
+                <div class="form-row">
+                    <label for="editUserName">Nuevo Nombre</label>
+                    <input type="text" id="editUserName" value="${currentName}">
+                </div>
                 <div class="form-row">
                     <label for="editUserLocation">Nueva Ubicación</label>
                     <select id="editUserLocation">
@@ -173,8 +272,14 @@
 
         // Guardar los cambios del usuario editado
         function saveUserEdit(userId) {
+            const newName = document.getElementById('editUserName').value.trim();
             const newLocation = document.getElementById('editUserLocation').value;
             const newPoints = parseInt(document.getElementById('editUserPoints').value) || 0;
+
+            if (!newName) {
+                alert("El nombre no puede estar vacío.");
+                return;
+            }
 
             if (!newLocation) {
                 alert("Ubicación no puede estar vacía.");
@@ -183,6 +288,7 @@
 
             const userRef = database.ref(`users/${userId}`);
             userRef.update({
+                name: newName,
                 location: newLocation,
                 points: newPoints
             }).then(() => {
