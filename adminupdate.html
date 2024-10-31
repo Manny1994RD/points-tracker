@@ -3,118 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Gestión de Actividades y Puntajes</title>
+    <title>Admin Panel - Gestión de Usuarios</title>
     <!-- Firebase App (Firebase v9 Compatibility Mode) -->
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
     <style>
-        /* General Styling */
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f4f9;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        h1, h2 {
-            text-align: center;
-            color: #333;
-        }
-
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .form-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: nowrap;
-        }
-
-        label {
-            font-size: 1rem;
-            color: #555;
-            flex: 1;
-            white-space: nowrap;
-        }
-
-        input[type="text"], input[type="number"], select {
+        /* Adding styles for the report tab */
+        .report-tab {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #28a745;
+            color: white;
             padding: 10px;
-            font-size: 1rem;
-            border: 1px solid #ccc;
+            text-decoration: none;
             border-radius: 5px;
-            width: 40%;
-            flex: 1;
-        }
-
-        button {
-            padding: 15px;
-            font-size: 1rem;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
             transition: background-color 0.3s ease;
-            width: 100%;
-            margin-top: 20px;
         }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        .user-list {
-            margin-top: 30px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        table, th, td {
-            border: 1px solid #ddd;
-            text-align: center;
-            padding: 8px;
-        }
-
-        th {
-            background-color: #007bff;
-            color: white;
-        }
-
-        .leaderboard {
-            margin-top: 30px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        .report-tab:hover {
+            background-color: #218838;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Admin Panel - Gestión de Actividades y Puntajes</h1>
+        <a href="https://manny1994rd.github.io/points-tracker/report.html" class="report-tab">Reporte</a>
+        <h1>Admin Panel - Gestión de Usuarios</h1>
 
         <!-- Formulario para Crear Nuevo Usuario -->
         <form id="newUserForm">
@@ -146,7 +61,6 @@
         <!-- Lista de Usuarios Existentes -->
         <div class="user-list">
             <h2>Usuarios Registrados</h2>
-            <input type="text" id="searchUser" placeholder="Buscar usuario..." onkeyup="filterUsers()">
             <table id="userListTable">
                 <thead>
                     <tr>
@@ -154,7 +68,6 @@
                         <th>Ubicación</th>
                         <th>Género</th>
                         <th>Puntos</th>
-                        <th>Actividades Completadas</th>
                         <th>Acciones</th>
                         <th>Eliminar</th>
                     </tr>
@@ -164,24 +77,9 @@
                 </tbody>
             </table>
         </div>
-
-        <!-- Leaderboard de Usuarios -->
-        <div class="leaderboard">
-            <h2>Leaderboard de Usuarios</h2>
-            <table id="leaderboardTable">
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Puntos</th>
-                    </tr>
-                </thead>
-                <tbody id="leaderboardBody">
-                    <!-- Leaderboard se rellenará aquí -->
-                </tbody>
-            </table>
-        </div>
     </div>
 
+    <script src="script.js"></script>
     <script>
         // Configuración de Firebase
         const firebaseConfig = {
@@ -206,7 +104,7 @@
             const userGender = document.getElementById('newUserGender').value;
 
             if (!userName) {
-                toastr.error("Por favor, ingrese un nombre.");
+                alert("Por favor, ingrese un nombre.");
                 return;
             }
 
@@ -215,14 +113,14 @@
                 name: userName,
                 location: userLocation,
                 gender: userGender,
-                points: 0,
-                activitiesCompleted: 0
+                points: 0
             }).then(() => {
-                toastr.success("Nuevo usuario creado correctamente.");
+                alert("Nuevo usuario creado correctamente.");
+                document.getElementById('newUserForm').reset();
                 loadUsers();
             }).catch(error => {
                 console.error("Error al crear el usuario:", error);
-                toastr.error("Error al crear el usuario. Consulte la consola para más detalles.");
+                alert("Error al crear el usuario. Consulte la consola para más detalles.");
             });
         }
 
@@ -241,19 +139,18 @@
                             <td>${user.location}</td>
                             <td>${user.gender}</td>
                             <td>${user.points}</td>
-                            <td>${user.activitiesCompleted}</td>
-                            <td><button onclick="editUser('${userSnapshot.key}', '${user.location}', ${user.points}, ${user.activitiesCompleted})">Editar</button></td>
+                            <td><button onclick="editUser('${userSnapshot.key}', '${user.location}', ${user.points})">Editar</button></td>
                             <td><button onclick="deleteUser('${userSnapshot.key}')">Eliminar</button></td>
                         `;
                         userListBody.appendChild(row);
                     });
                 }
-                updateLeaderboard();
             });
         }
 
         // Editar usuario
-        function editUser(userId, currentLocation, currentPoints, currentActivities) {
+        function editUser(userId, currentLocation, currentPoints) {
+            const userRow = document.querySelector(`button[onclick="editUser('${userId}', '${currentLocation}', ${currentPoints})"]`).closest('tr');
             const editFormHtml = `
                 <div class="form-row">
                     <label for="editUserLocation">Nueva Ubicación</label>
@@ -269,39 +166,31 @@
                     <label for="editUserPoints">Nuevos Puntos</label>
                     <input type="number" id="editUserPoints" value="${currentPoints}">
                 </div>
-                <div class="form-row">
-                    <label for="editUserActivities">Actividades Completadas</label>
-                    <input type="number" id="editUserActivities" value="${currentActivities}">
-                </div>
                 <button type="button" onclick="saveUserEdit('${userId}')">Guardar Cambios</button>
             `;
-
-            const userListBody = document.getElementById('userListBody');
-            userListBody.innerHTML = editFormHtml;
+            userRow.innerHTML = editFormHtml;
         }
 
         // Guardar los cambios del usuario editado
         function saveUserEdit(userId) {
             const newLocation = document.getElementById('editUserLocation').value;
             const newPoints = parseInt(document.getElementById('editUserPoints').value) || 0;
-            const newActivities = parseInt(document.getElementById('editUserActivities').value) || 0;
 
             if (!newLocation) {
-                toastr.error("Ubicación no puede estar vacía.");
+                alert("Ubicación no puede estar vacía.");
                 return;
             }
 
             const userRef = database.ref(`users/${userId}`);
             userRef.update({
                 location: newLocation,
-                points: newPoints,
-                activitiesCompleted: newActivities
+                points: newPoints
             }).then(() => {
-                toastr.success("Datos del usuario actualizados.");
+                alert("Datos del usuario actualizados.");
                 loadUsers();
             }).catch(error => {
                 console.error("Error al actualizar los datos del usuario:", error);
-                toastr.error("Error al actualizar los datos del usuario. Consulte la consola para más detalles.");
+                alert("Error al actualizar los datos del usuario. Consulte la consola para más detalles.");
             });
         }
 
@@ -311,49 +200,14 @@
             if (confirmation) {
                 database.ref(`users/${userId}`).remove()
                 .then(() => {
-                    toastr.success('Usuario eliminado correctamente.');
+                    alert('Usuario eliminado correctamente.');
                     loadUsers();
                 })
                 .catch(error => {
                     console.error('Error al eliminar el usuario:', error);
-                    toastr.error('Error al eliminar el usuario. Consulte la consola para más detalles.');
+                    alert('Error al eliminar el usuario. Consulte la consola para más detalles.');
                 });
             }
-        }
-
-        // Actualizar Leaderboard
-        function updateLeaderboard() {
-            const leaderboardBody = document.getElementById('leaderboardBody');
-            leaderboardBody.innerHTML = '';
-
-            database.ref('users').orderByChild('points').limitToLast(10).once('value', (snapshot) => {
-                if (snapshot.exists()) {
-                    snapshot.forEach(userSnapshot => {
-                        const user = userSnapshot.val();
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${user.name}</td>
-                            <td>${user.points}</td>
-                        `;
-                        leaderboardBody.insertBefore(row, leaderboardBody.firstChild);
-                    });
-                }
-            });
-        }
-
-        // Filtrar usuarios
-        function filterUsers() {
-            const filter = document.getElementById('searchUser').value.toLowerCase();
-            const rows = document.querySelectorAll('#userListTable tbody tr');
-            rows.forEach(row => {
-                const cells = row.getElementsByTagName('td');
-                const name = cells[0].textContent.toLowerCase();
-                if (name.includes(filter)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
         }
 
         // Cargar usuarios al cargar la página
