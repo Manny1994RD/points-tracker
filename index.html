@@ -230,11 +230,11 @@
 
         <!-- Leaderboard Section -->
         <div class="leaderboard">
-            <h2>Clasificación de los Mejores 10 - Hermano</h2>
+            <h2>Clasificación General - Hermano</h2>
             <table id="leaderboardTableMale">
                 <thead>
                     <tr>
-                        <th>RANK</th>
+                        <th>RANGO</th>
                         <th>Top Scores</th>
                         <th>Top 10 Participants</th>
                         <th>Top 10 Locations</th>
@@ -247,11 +247,11 @@
         </div>
         
         <div class="leaderboard">
-            <h2>Clasificación de los Mejores 10 - Hermana</h2>
+            <h2>Clasificación General - Hermana</h2>
             <table id="leaderboardTableFemale">
                 <thead>
                     <tr>
-                        <th>RANK</th>
+                        <th>RANGO</th>
                         <th>Top Scores</th>
                         <th>Top 10 Participants</th>
                         <th>Top 10 Locations</th>
@@ -438,10 +438,10 @@
 
                 // Sort users by points in descending order and get the top 10
                 maleUsers.sort((a, b) => b.points - a.points);
-                const topMaleUsers = maleUsers.slice(0, 10);
+                const topMaleUsers = maleUsers;
                 
                 femaleUsers.sort((a, b) => b.points - a.points);
-                const topFemaleUsers = femaleUsers.slice(0, 10);
+                const topFemaleUsers = femaleUsers;
 
                 // Populate male leaderboard
                 topMaleUsers.forEach((user, index) => {
