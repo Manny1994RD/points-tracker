@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Puntos y Clasificación - Sistema Dinámico</title>
+    <!-- Firebase App (Firebase v9 Compatibility Mode) -->
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <style>
+        /* General Styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .form-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: nowrap;
+        }
+
+        label {
+            font-size: 1rem;
+            color: #555;
+            flex: 1;
+            white-space: nowrap;
+        }
+
+        input[type="number"], select {
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 40%;
+            flex: 1;
+        }
+
+        button {
+            padding: 15px;
+            font-size: 1rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .leaderboard {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+            text-align: center;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .top-scores {
+            font-weight: bold;
+            color: #ff6347;
+        }
+
+        .progress-bar {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin-top: 10px;
+            position: relative;
+        }
+
+        .progress-bar-fill {
+            height: 25px;
+            background-color: #28a745;
+            border-radius: 10px;
+            width: 0;
+            transition: width 0.5s ease-in-out;
+        }
+
+        .avatar-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: #007bff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            margin: 0 10px;
+            position: relative;
+        }
+
+        .avatar-level {
+            position: absolute;
+            bottom: -10px;
+            background-color: #fff;
+            color: #007bff;
+            padding: 5px;
+            border-radius: 50%;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .animate-score {
+            animation: scoreAnimation 1s ease-in-out;
+        }
+
+        @keyframes scoreAnimation {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Formulario de Envío de Puntos</h1>
+
+        <!-- Formulario -->
+        <form id="pointsForm">
+            <!-- Personal Information -->
+            <div class="form-row">
+                <label for="genderSelect">Seleccionar Género</label>
+                <select id="genderSelect" onchange="filterUsersByGender()">
+                    <option value="">Seleccionar género</option>
+                    <option value="Hermano">Hermano</option>
+                    <option value="Hermana">Hermana</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label for="memberNameSelect">Seleccionar Miembro</label>
+                <select id="memberNameSelect">
+                    <option value="">Seleccionar miembro</option>
+                    <!-- Existing users will be populated here -->
+                </select>
+            </div>
+            <div class="form-row">
+                <label for="submissionDate">Fecha</label>
+                <input type="date" id="submissionDate" required>
+            </div>
+
+            <div class="form-row">
+                <label for="simple">SIMPLE (1)</label>
+                <input type="number" id="simple" value="0">
+            </div>
+            <div class="form-row">
+                <label for="significativo">SIGNIFICATIVO (2)</label>
+                <input type="number" id="significativo" value="0">
+            </div>
+            <div class="form-row">
+                <label for="estudio">ESTUDIO (10)</label>
+                <input type="number" id="estudio" value="0">
+            </div>
+
+            <!-- Button to calculate total points -->
+            <button type="button" onclick="confirmSubmission()">Calcular Puntos Totales y Guardar</button>
+        </form>
+
+        <!-- Avatar and Progress Bar -->
+        <div class="avatar-container">
+            <div class="avatar">
+                U
+                <div class="avatar-level" id="userLevel">1</div>
+            </div>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-bar-fill" id="progressBarFill"></div>
+        </div>
+
+        <!-- Display total points -->
+        <h2>Puntos Totales: <span id="totalPoints" class="animate-score">0</span></h2>
+
+        <!-- Leaderboard Section -->
+        <div class="leaderboard">
+            <h2>Clasificación General - Hermano</h2>
+            <table id="leaderboardTableMale">
+                <thead>
+                    <tr>
+                        <th>RANGO</th>
+                        <th>Top Scores</th>
+                        <th>Top 10 Participants</th>
+                        <th>Top 10 Locations</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboardBodyMale">
+                    <!-- Rankings will be populated here -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="leaderboard">
+            <h2>Clasificación General - Hermana</h2>
+            <table id="leaderboardTableFemale">
+                <thead>
+                    <tr>
+                        <th>RANGO</th>
+                        <th>Top Scores</th>
+                        <th>Top 10 Participants</th>
+                        <th>Top 10 Locations</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboardBodyFemale">
+                    <!-- Rankings will be populated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDRddA_EeZvCMZS5qQAi4pkYtOR_Xblib8",
+            authDomain: "mario-racer.firebaseapp.com",
+            databaseURL: "https://mario-racer-default-rtdb.firebaseio.com",
+            projectId: "mario-racer",
+            storageBucket: "mario-racer.appspot.com",
+            messagingSenderId: "373143059252",
+            appId: "1:373143059252:web:5dc28e804781ff688d8361",
+            measurementId: "G-FM47SXM2G0"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Load existing users into the dropdown based on selected gender
+        function loadExistingUsers() {
+            const memberNameSelect = document.getElementById('memberNameSelect');
+            memberNameSelect.innerHTML = '<option value="">Seleccionar miembro</option>'; // Reset options
+
+            database.ref('users').once('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    snapshot.forEach(userSnapshot => {
+                        const user = userSnapshot.val();
+                        const option = document.createElement('option');
+                        option.value = userSnapshot.key;
+                        option.textContent = `${user.name} - ${user.location}`;
+                        option.dataset.gender = user.gender;
+                        memberNameSelect.appendChild(option);
+                    });
+                }
+            });
+        }
+
+        // Filter users based on selected gender
+        function filterUsersByGender() {
+            const gender = document.getElementById('genderSelect').value;
+            const memberNameSelect = document.getElementById('memberNameSelect');
+
+            for (let i = 0; i < memberNameSelect.options.length; i++) {
+                const option = memberNameSelect.options[i];
+                if (option.value === "") continue;
+
+                if (option.dataset.gender === gender || gender === "") {
+                    option.style.display = "block";
+                } else {
+                    option.style.display = "none";
+                }
+            }
+        }
+
+        // Function to calculate total points
+        function calculateTotal() {
+            let total = 0;
+
+            // Parse inputs as integers and handle empty or invalid input as 0
+            const simple = parseInt(document.getElementById('simple').value) || 0;
+            const significativo = parseInt(document.getElementById('significativo').value) || 0;
+            const estudio = parseInt(document.getElementById('estudio').value) || 0;
+
+            total += simple * 1;
+            total += significativo * 2;
+            total += estudio * 10;
+
+            // Display total points with animation
+            const totalPointsElement = document.getElementById('totalPoints');
+            totalPointsElement.innerText = total;
+            totalPointsElement.classList.add('animate-score');
+            setTimeout(() => totalPointsElement.classList.remove('animate-score'), 1000);
+
+            // Update progress bar
+            const progressBarFill = document.getElementById('progressBarFill');
+            const progressPercentage = Math.min(total / 1000 * 100, 100); // Cap at 100%
+            progressBarFill.style.width = `${progressPercentage}%`;
+
+            // Update user level
+            const userLevelElement = document.getElementById('userLevel');
+            const level = Math.floor(total / 100) + 1;
+            userLevelElement.innerText = level;
+
+            return total;
+        }
+
+       
