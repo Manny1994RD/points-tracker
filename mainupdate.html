@@ -306,8 +306,39 @@
     </div>
 
     <script>
-        // Firebase configuration and JavaScript logic
-        // Your existing Firebase and leaderboard code
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDRddA_EeZvCMZS5qQAi4pkYtOR_Xblib8",
+            authDomain: "mario-racer.firebaseapp.com",
+            databaseURL: "https://mario-racer-default-rtdb.firebaseio.com",
+            projectId: "mario-racer",
+            storageBucket: "mario-racer.appspot.com",
+            messagingSenderId: "373143059252",
+            appId: "1:373143059252:web:5dc28e804781ff688d8361"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Define the filterUsersByGender function
+        function filterUsersByGender() {
+            const gender = document.getElementById('genderSelect').value;
+            const memberNameSelect = document.getElementById('memberNameSelect');
+
+            for (let i = 0; i < memberNameSelect.options.length; i++) {
+                const option = memberNameSelect.options[i];
+                if (option.value === "") continue;
+
+                if (option.dataset.gender === gender || gender === "") {
+                    option.style.display = "block";
+                } else {
+                    option.style.display = "none";
+                }
+            }
+        }
+
+        // Your other functions like loadExistingUsers, calculateTotal, confirmSubmission, etc.
     </script>
 </body>
 </html>
