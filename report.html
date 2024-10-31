@@ -74,7 +74,10 @@
 <body>
     <div class="container">
         <h1>Administrar Envíos de Puntos</h1>
-        <table id="submissionsTable">
+        <div class="action-buttons">
+            <input type="text" id="searchBar" placeholder="Buscar por nombre o ubicación" onkeyup="searchSubmissions()">
+        </div>
+        $1
             <thead>
                 <tr>
                     <th>Nombre</th>
@@ -82,15 +85,18 @@
                     <th>Género</th>
                     <th>Puntos</th>
                     <th>Fecha</th>
-                    <th>Acciones</th>
-                </tr>
+                    <th>Eliminar</th>
+                <th>Seleccionar</th>
+                $1
             </thead>
-            <tbody id="submissionsBody">
+            $1
+                <!-- Data will include an attribute for user ID -->
                 <!-- Submissions will be populated here -->
             </tbody>
         </table>
-        <div class="action-buttons">
-            <button onclick="exportToExcel()">Exportar a Excel</button>
+        $1
+            <button onclick="exportSelectedToExcel()">Exportar Seleccionados a Excel</button>
+            <button onclick="bulkDelete()">Eliminar Seleccionados</button>
         </div>
     </div>
 
@@ -120,13 +126,14 @@
                 if (snapshot.exists()) {
                     snapshot.forEach(userSnapshot => {
                         const user = userSnapshot.val();
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
+                        row.setAttribute('data-id', userSnapshot.key);
+                        $1 `
                             <td>${user.name}</td>
                             <td>${user.location}</td>
                             <td>${user.gender}</td>
                             <td>${user.points}</td>
-                            <td>${user.date || '-'}</td>
+                            $1<button onclick="deleteSubmission('${userSnapshot.key}')">Eliminar</button></td>
+                            <td><input type="checkbox" class="selectCheckbox"></td>
                             <td>
                                 <button onclick="editSubmission('${userSnapshot.key}')">Editar</button>
                             </td>
@@ -138,7 +145,20 @@
         }
 
         // Edit a submission
-        function editSubmission(userId) {
+        function deleteSubmission(userId) {
+            if (confirm('¿Está seguro de que desea eliminar este envío?')) {
+                const userRef = database.ref(`users/${userId}`);
+                userRef.remove().then(() => {
+                    alert('Envío eliminado correctamente.');
+                    loadSubmissions();
+                }).catch(error => {
+                    console.error('Error al eliminar el envío:', error);
+                    alert('Error al eliminar el envío. Consulte la consola para más detalles.');
+                });
+            }
+        }
+
+        $1
             const newPoints = prompt('Ingrese los nuevos puntos:');
             if (newPoints !== null && !isNaN(newPoints)) {
                 const userRef = database.ref(`users/${userId}`);
@@ -155,7 +175,31 @@
         }
 
         // Export data to Excel
-        function exportToExcel() {
+        function exportSelectedToExcel() {
+            const submissions = [];
+            const headers = ['Nombre', 'Ubicación', 'Género', 'Puntos', 'Fecha'];
+            submissions.push(headers);
+
+            const checkboxes = document.querySelectorAll('.selectCheckbox:checked');
+            checkboxes.forEach((checkbox) => {
+                const row = checkbox.closest('tr');
+                const cells = row.querySelectorAll('td');
+                submissions.push([
+                    cells[0].innerText,
+                    cells[1].innerText,
+                    cells[2].innerText,
+                    cells[3].innerText,
+                    cells[4].innerText
+                ]);
+            });
+
+            const ws = XLSX.utils.aoa_to_sheet(submissions);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Submissions");
+            XLSX.writeFile(wb, "Selected_Submissions.xlsx");
+        }
+
+        $1
             const submissions = [];
             const headers = ['Nombre', 'Ubicación', 'Género', 'Puntos', 'Fecha'];
             submissions.push(headers);
@@ -176,7 +220,39 @@
         }
 
         // Load submissions on page load
-        window.onload = function() {
+        function bulkDelete() {
+            const checkboxes = document.querySelectorAll('.selectCheckbox:checked');
+            if (checkboxes.length === 0) {
+                alert('Seleccione al menos un envío para eliminar.');
+                return;
+            }
+            if (confirm('¿Está seguro de que desea eliminar los envíos seleccionados?')) {
+                checkboxes.forEach((checkbox) => {
+                    const userId = checkbox.closest('tr').getAttribute('data-id');
+                    database.ref(`users/${userId}`).remove();
+                });
+                alert('Envíos seleccionados eliminados correctamente.');
+                loadSubmissions();
+            }
+        }
+
+        function searchSubmissions() {
+            const filter = document.getElementById('searchBar').value.toUpperCase();
+            const rows = document.getElementById('submissionsBody').getElementsByTagName('tr');
+            for (let i = 0; i < rows.length; i++) {
+                const cells = rows[i].getElementsByTagName('td');
+                let match = false;
+                for (let j = 0; j < cells.length - 2; j++) {
+                    if (cells[j].innerText.toUpperCase().indexOf(filter) > -1) {
+                        match = true;
+                        break;
+                    }
+                }
+                rows[i].style.display = match ? '' : 'none';
+            }
+        }
+
+        $1
             loadSubmissions();
         };
     </script>
