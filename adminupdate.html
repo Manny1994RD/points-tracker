@@ -7,33 +7,85 @@
     <!-- Firebase App (Firebase v9 Compatibility Mode) -->
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
-    <link rel="stylesheet" href="styles.css">
     <style>
-        /* Styling for login form */
-        .login-form {
-            max-width: 300px;
-            margin: 100px auto;
+        /* Adding styles for the report tab */
+        .report-tab {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #28a745;
+            color: white;
+            padding: 10px;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .report-tab:hover {
+            background-color: #218838;
+        }
+
+        /* Container Styling */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
             padding: 20px;
             background-color: white;
             border-radius: 10px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            display: flex;
-            flex-direction: column;
+            position: relative;
         }
 
-        .login-form input {
-            width: 100%;
+        /* General Styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #333;
+            margin-top: 0;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .form-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: nowrap;
+            margin-bottom: 10px;
+        }
+
+        label {
+            font-size: 1rem;
+            color: #555;
+            flex: 1;
+            white-space: nowrap;
+            margin-right: 10px;
+        }
+
+        input[type="text"], input[type="number"], select {
             padding: 10px;
-            margin: 10px 0;
             font-size: 1rem;
             border: 1px solid #ccc;
             border-radius: 5px;
+            width: 60%;
+            flex: 1;
         }
 
-        .login-form button {
-            padding: 10px;
-            width: 100%;
+        button {
+            padding: 15px;
             font-size: 1rem;
             background-color: #007bff;
             color: white;
@@ -41,102 +93,96 @@
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
         }
 
-        .login-form button:hover {
+        button:hover {
             background-color: #0056b3;
         }
 
-        /* Initial hiding of admin panel */
-        #adminPanel {
-            display: none;
+        .user-list {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
-        /* Styling for admin panel */
-        /* Your existing CSS code here... */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+            text-align: center;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
     </style>
 </head>
 <body>
-    <!-- Login Form Section -->
-    <div class="login-form" id="loginForm">
-        <h2>Admin Login</h2>
-        <input type="text" id="username" placeholder="Username" required>
-        <input type="password" id="password" placeholder="Password" required>
-        <button onclick="login()">Login</button>
-    </div>
+    <div class="container" id="adminPanel">
+        <a href="https://manny1994rd.github.io/points-tracker/report.html" class="report-tab">Reporte</a>
+        <h1>Admin Panel - Gestión de Usuarios</h1>
 
-    <!-- Admin Panel Content -->
-    <div id="adminPanel">
-        <div class="container">
-            <a href="https://manny1994rd.github.io/points-tracker/report.html" class="report-tab">Reporte</a>
-            <h1>Admin Panel - Gestión de Usuarios</h1>
-
-            <!-- Formulario para Crear Nuevo Usuario -->
-            <form id="newUserForm">
-                <h2>Crear Nuevo Usuario</h2>
-                <div class="form-row">
-                    <label for="newUserName">Nombre del Usuario</label>
-                    <input type="text" id="newUserName" placeholder="Introduce nombre" required>
-                </div>
-                <div class="form-row">
-                    <label for="newUserLocation">Ubicación</label>
-                    <select id="newUserLocation">
-                        <option value="Santiago">Santiago</option>
-                        <option value="La Vega">La Vega</option>
-                        <option value="Moca">Moca</option>
-                        <option value="Puerto Plata">Puerto Plata</option>
-                        <option value="Jarabacoa">Jarabacoa</option>
-                    </select>
-                </div>
-                <div class="form-row">
-                    <label for="newUserGender">Género</label>
-                    <select id="newUserGender">
-                        <option value="Hermano">Hermano</option>
-                        <option value="Hermana">Hermana</option>
-                    </select>
-                </div>
-                <button type="button" onclick="createNewUser()">Crear Usuario</button>
-            </form>
-
-            <!-- Lista de Usuarios Existentes -->
-            <div class="user-list">
-                <h2>Usuarios Registrados</h2>
-                <table id="userListTable">
-                    <thead>
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Ubicación</th>
-                            <th>Género</th>
-                            <th>Puntos</th>
-                            <th>Acciones</th>
-                            <th>Eliminar</th>
-                        </tr>
-                    </thead>
-                    <tbody id="userListBody">
-                        <!-- Lista de usuarios se rellenará aquí -->
-                    </tbody>
-                </table>
+        <!-- Formulario para Crear Nuevo Usuario -->
+        <form id="newUserForm">
+            <h2>Crear Nuevo Usuario</h2>
+            <div class="form-row">
+                <label for="newUserName">Nombre del Usuario</label>
+                <input type="text" id="newUserName" placeholder="Introduce nombre" required>
             </div>
+            <div class="form-row">
+                <label for="newUserLocation">Ubicación</label>
+                <select id="newUserLocation">
+                    <option value="Santiago">Santiago</option>
+                    <option value="La Vega">La Vega</option>
+                    <option value="Moca">Moca</option>
+                    <option value="Puerto Plata">Puerto Plata</option>
+                    <option value="Jarabacoa">Jarabacoa</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label for="newUserGender">Género</label>
+                <select id="newUserGender">
+                    <option value="Hermano">Hermano</option>
+                    <option value="Hermana">Hermana</option>
+                </select>
+            </div>
+            <button type="button" onclick="createNewUser()">Crear Usuario</button>
+        </form>
+
+        <!-- Lista de Usuarios Existentes -->
+        <div class="user-list">
+            <h2>Usuarios Registrados</h2>
+            <table id="userListTable">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Ubicación</th>
+                        <th>Género</th>
+                        <th>Puntos</th>
+                        <th>Acciones</th>
+                        <th>Eliminar</th>
+                    </tr>
+                </thead>
+                <tbody id="userListBody">
+                    <!-- Lista de usuarios se rellenará aquí -->
+                </tbody>
+            </table>
         </div>
     </div>
 
     <script src="script.js"></script>
     <script>
-        // Simple login function
-        function login() {
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value.trim();
-
-            // Check credentials
-            if (username === 'admin' && password === '1234') {
-                document.getElementById('loginForm').style.display = 'none';
-                document.getElementById('adminPanel').style.display = 'block';
-            } else {
-                alert('Incorrect username or password');
-            }
-        }
-
-        // Firebase configuration and initialization
+        // Configuración de Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDRddA_EeZvCMZS5qQAi4pkYtOR_Xblib8",
             authDomain: "mario-racer.firebaseapp.com",
@@ -152,28 +198,57 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // Functions for creating, loading, editing, and deleting users
+        // Existing functions for creating, loading, and deleting users
         function createNewUser() {
-            // Your existing createNewUser function code here
+            const userName = document.getElementById('newUserName').value.trim();
+            const userLocation = document.getElementById('newUserLocation').value;
+            const userGender = document.getElementById('newUserGender').value;
+
+            if (!userName) {
+                alert("Por favor, ingrese un nombre.");
+                return;
+            }
+
+            const newUserRef = database.ref('users').push();
+            newUserRef.set({
+                name: userName,
+                location: userLocation,
+                gender: userGender,
+                points: 0
+            }).then(() => {
+                alert("Nuevo usuario creado correctamente.");
+                document.getElementById('newUserForm').reset();
+                loadUsers();
+            }).catch(error => {
+                console.error("Error al crear el usuario:", error);
+                alert("Error al crear el usuario. Consulte la consola para más detalles.");
+            });
         }
-        
+
         function loadUsers() {
-            // Your existing loadUsers function code here
+            const userListBody = document.getElementById('userListBody');
+            userListBody.innerHTML = '';
+
+            database.ref('users').once('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    snapshot.forEach(userSnapshot => {
+                        const user = userSnapshot.val();
+                        const row = document.createElement('tr');
+                        row.setAttribute('data-user-id', userSnapshot.key);
+                        row.innerHTML = `
+                            <td>${user.name}</td>
+                            <td>${user.location}</td>
+                            <td>${user.gender}</td>
+                            <td>${user.points}</td>
+                            <td><button onclick="editUser('${userSnapshot.key}', '${user.name}', '${user.location}', ${user.points})">Editar</button></td>
+                            <td><button onclick="deleteUser('${userSnapshot.key}')">Eliminar</button></td>
+                        `;
+                        userListBody.appendChild(row);
+                    });
+                }
+            });
         }
 
-        function editUser(userId, currentName, currentLocation, currentPoints) {
-            // Your existing editUser function code here
-        }
-
-        function saveUserEdit(userId) {
-            // Your existing saveUserEdit function code here
-        }
-
-        function deleteUser(userId) {
-            // Your existing deleteUser function code here
-        }
-
-        // Load users when the page loads (only if logged in)
         window.onload = loadUsers;
     </script>
 </body>
