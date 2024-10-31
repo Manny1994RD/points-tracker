@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulario de Puntos y Clasificación</title>
+    <title>Admin Panel - Gestión de Usuarios</title>
     <!-- Firebase App (Firebase v9 Compatibility Mode) -->
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
@@ -50,7 +50,7 @@
             white-space: nowrap;
         }
 
-        input[type="number"], select {
+        input[type="text"], input[type="number"], select {
             padding: 10px;
             font-size: 1rem;
             border: 1px solid #ccc;
@@ -76,7 +76,7 @@
             background-color: #0056b3;
         }
 
-        .leaderboard {
+        .user-list {
             margin-top: 30px;
             padding: 15px;
             background-color: #f8f9fa;
@@ -100,145 +100,62 @@
             background-color: #007bff;
             color: white;
         }
-
-        .top-scores {
-            font-weight: bold;
-            color: #ff6347;
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Formulario de Envío de Puntos</h1>
+        <h1>Admin Panel - Gestión de Usuarios</h1>
 
-        <!-- Formulario -->
-        <form id="pointsForm">
-            <!-- Personal Information -->
+        <!-- Formulario para Crear Nuevo Usuario -->
+        <form id="newUserForm">
+            <h2>Crear Nuevo Usuario</h2>
             <div class="form-row">
-                <label for="genderSelect">Seleccionar Género</label>
-                <select id="genderSelect" onchange="filterUsersByGender()">
-                    <option value="">Seleccionar género</option>
+                <label for="newUserName">Nombre del Usuario</label>
+                <input type="text" id="newUserName" placeholder="Introduce nombre" required>
+            </div>
+            <div class="form-row">
+                <label for="newUserLocation">Ubicación</label>
+                <select id="newUserLocation">
+                    <option value="Santiago">Santiago</option>
+                    <option value="La Vega">La Vega</option>
+                    <option value="Moca">Moca</option>
+                    <option value="Puerto Plata">Puerto Plata</option>
+                    <option value="Jarabacoa">Jarabacoa</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label for="newUserGender">Género</label>
+                <select id="newUserGender">
                     <option value="Hermano">Hermano</option>
                     <option value="Hermana">Hermana</option>
                 </select>
             </div>
-            <div class="form-row">
-                <label for="memberNameSelect">Seleccionar Miembro</label>
-                <select id="memberNameSelect">
-                    <option value="">Seleccionar miembro</option>
-                    <!-- Existing users will be populated here -->
-                </select>
-            </div>
-            <div class="form-row">
-                <label for="submissionDate">Fecha</label>
-                <input type="date" id="submissionDate" required>
-            </div>
-
-            <!-- Numeric Input Fields -->
-            <div class="form-row">
-                <label for="simple">SIMPLE (1)</label>
-                <input type="number" id="simple" value="0">
-            </div>
-            <div class="form-row">
-                <label for="significativo">SIGNIFICATIVO (2)</label>
-                <input type="number" id="significativo" value="0">
-            </div>
-            <div class="form-row">
-                <label for="estudio">ESTUDIO (10)</label>
-                <input type="number" id="estudio" value="0">
-            </div>
-            <div class="form-row">
-                <label for="invitados">INVITADOS (50)</label>
-                <input type="number" id="invitados" value="0">
-            </div>
-            <div class="form-row">
-                <label for="bautismo">BAUTISMO (500)</label>
-                <input type="number" id="bautismo" value="0">
-            </div>
-            <div class="form-row">
-                <label for="culto">CULTO (1000)</label>
-                <input type="number" id="culto" value="0">
-            </div>
-
-            <!-- Checkbox Input Fields -->
-            <div class="form-row">
-                <label for="miPaginaCheck">MI PÁGINA (25)</label>
-                <input type="checkbox" id="miPaginaCheck">
-            </div>
-            <div class="form-row">
-                <label for="prayDailyCheck">ORACIÓN DIARIA (25)</label>
-                <input type="checkbox" id="prayDailyCheck">
-            </div>
-            <div class="form-row">
-                <label for="offlineEduCheck">OFFLINE EDU (50)</label>
-                <input type="checkbox" id="offlineEduCheck">
-            </div>
-            <div class="form-row">
-                <label for="diaDePrepararCheck">DÍA DE PREPARAR (50)</label>
-                <input type="checkbox" id="diaDePrepararCheck">
-            </div>
-            <div class="form-row">
-                <label for="cartaMadreCheck">CARTA A MADRE (10)</label>
-                <input type="checkbox" id="cartaMadreCheck">
-            </div>
-            <div class="form-row">
-                <label for="hongoCheck">HONGO (500)</label>
-                <input type="checkbox" id="hongoCheck">
-            </div>
-            <div class="form-row">
-                <label for="guienoCheck">GUIENO (-500)</label>
-                <input type="checkbox" id="guienoCheck">
-            </div>
-            <div class="form-row">
-                <label for="tortugaRojaCheck">TORTUGA ROJA (-100)</label>
-                <input type="checkbox" id="tortugaRojaCheck">
-            </div>
-
-            <!-- Button to calculate total points -->
-            <button type="button" onclick="confirmSubmission()">Calcular Puntos Totales y Guardar</button>
+            <button type="button" onclick="createNewUser()">Crear Usuario</button>
         </form>
 
-        <!-- Display total points -->
-        <h2>Puntos Totales: <span id="totalPoints">0</span></h2>
-
-        <!-- Leaderboard Section -->
-        <div class="leaderboard">
-            <h2>Clasificación de los Mejores 10 - Hermano</h2>
-            <table id="leaderboardTableMale">
+        <!-- Lista de Usuarios Existentes -->
+        <div class="user-list">
+            <h2>Usuarios Registrados</h2>
+            <table id="userListTable">
                 <thead>
                     <tr>
-                        <th>RANK</th>
-                        <th>Top Scores</th>
-                        <th>Top 10 Participants</th>
-                        <th>Top 10 Locations</th>
+                        <th>Nombre</th>
+                        <th>Ubicación</th>
+                        <th>Género</th>
+                        <th>Puntos</th>
+                        <th>Acciones</th>
+                        <th>Eliminar</th>
                     </tr>
                 </thead>
-                <tbody id="leaderboardBodyMale">
-                    <!-- Rankings will be populated here -->
-                </tbody>
-            </table>
-        </div>
-        
-        <div class="leaderboard">
-            <h2>Clasificación de los Mejores 10 - Hermana</h2>
-            <table id="leaderboardTableFemale">
-                <thead>
-                    <tr>
-                        <th>RANK</th>
-                        <th>Top Scores</th>
-                        <th>Top 10 Participants</th>
-                        <th>Top 10 Locations</th>
-                    </tr>
-                </thead>
-                <tbody id="leaderboardBodyFemale">
-                    <!-- Rankings will be populated here -->
+                <tbody id="userListBody">
+                    <!-- Lista de usuarios se rellenará aquí -->
                 </tbody>
             </table>
         </div>
     </div>
 
     <script>
-        // Your web app's Firebase configuration
+        // Configuración de Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDRddA_EeZvCMZS5qQAi4pkYtOR_Xblib8",
             authDomain: "mario-racer.firebaseapp.com",
@@ -250,197 +167,125 @@
             measurementId: "G-FM47SXM2G0"
         };
 
-        // Initialize Firebase
+        // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // Load existing users into the dropdown based on selected gender
-        function loadExistingUsers() {
-            const memberNameSelect = document.getElementById('memberNameSelect');
-            memberNameSelect.innerHTML = '<option value="">Seleccionar miembro</option>'; // Reset options
+        // Crear un nuevo usuario
+        function createNewUser() {
+            const userName = document.getElementById('newUserName').value.trim();
+            const userLocation = document.getElementById('newUserLocation').value;
+            const userGender = document.getElementById('newUserGender').value;
+
+            if (!userName) {
+                alert("Por favor, ingrese un nombre.");
+                return;
+            }
+
+            const newUserRef = database.ref('users').push();
+            newUserRef.set({
+                name: userName,
+                location: userLocation,
+                gender: userGender,
+                points: 0
+            }).then(() => {
+                alert("Nuevo usuario creado correctamente.");
+                loadUsers();
+            }).catch(error => {
+                console.error("Error al crear el usuario:", error);
+                alert("Error al crear el usuario. Consulte la consola para más detalles.");
+            });
+        }
+
+        // Cargar usuarios existentes
+        function loadUsers() {
+            const userListBody = document.getElementById('userListBody');
+            userListBody.innerHTML = '';
 
             database.ref('users').once('value', (snapshot) => {
                 if (snapshot.exists()) {
                     snapshot.forEach(userSnapshot => {
                         const user = userSnapshot.val();
-                        const option = document.createElement('option');
-                        option.value = userSnapshot.key;
-                        option.textContent = `${user.name} - ${user.location}`;
-                        option.dataset.gender = user.gender;
-                        memberNameSelect.appendChild(option);
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${user.name}</td>
+                            <td>${user.location}</td>
+                            <td>${user.gender}</td>
+                            <td>${user.points}</td>
+                            <td><button onclick="editUser('${userSnapshot.key}', '${user.location}', ${user.points})">Editar</button></td>
+                            <td><button onclick="deleteUser('${userSnapshot.key}')">Eliminar</button></td>
+                        `;
+                        userListBody.appendChild(row);
                     });
                 }
             });
         }
 
-        // Filter users based on selected gender
-        function filterUsersByGender() {
-            const gender = document.getElementById('genderSelect').value;
-            const memberNameSelect = document.getElementById('memberNameSelect');
+        // Editar usuario
+        function editUser(userId, currentLocation, currentPoints) {
+            const editFormHtml = `
+                <div class="form-row">
+                    <label for="editUserLocation">Nueva Ubicación</label>
+                    <select id="editUserLocation">
+                        <option value="Santiago" ${currentLocation === 'Santiago' ? 'selected' : ''}>Santiago</option>
+                        <option value="La Vega" ${currentLocation === 'La Vega' ? 'selected' : ''}>La Vega</option>
+                        <option value="Moca" ${currentLocation === 'Moca' ? 'selected' : ''}>Moca</option>
+                        <option value="Puerto Plata" ${currentLocation === 'Puerto Plata' ? 'selected' : ''}>Puerto Plata</option>
+                        <option value="Jarabacoa" ${currentLocation === 'Jarabacoa' ? 'selected' : ''}>Jarabacoa</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label for="editUserPoints">Nuevos Puntos</label>
+                    <input type="number" id="editUserPoints" value="${currentPoints}">
+                </div>
+                <button type="button" onclick="saveUserEdit('${userId}')">Guardar Cambios</button>
+            `;
 
-            for (let i = 0; i < memberNameSelect.options.length; i++) {
-                const option = memberNameSelect.options[i];
-                if (option.value === "") continue;
-
-                if (option.dataset.gender === gender || gender === "") {
-                    option.style.display = "block";
-                } else {
-                    option.style.display = "none";
-                }
-            }
+            const userListBody = document.getElementById('userListBody');
+            userListBody.innerHTML = editFormHtml;
         }
 
-        // Function to calculate total points
-        function calculateTotal() {
-            let total = 0;
+        // Guardar los cambios del usuario editado
+        function saveUserEdit(userId) {
+            const newLocation = document.getElementById('editUserLocation').value;
+            const newPoints = parseInt(document.getElementById('editUserPoints').value) || 0;
 
-            // Parse inputs as integers and handle empty or invalid input as 0
-            const simple = parseInt(document.getElementById('simple').value) || 0;
-            const significativo = parseInt(document.getElementById('significativo').value) || 0;
-            const estudio = parseInt(document.getElementById('estudio').value) || 0;
-            const invitados = parseInt(document.getElementById('invitados').value) || 0;
-            const bautismo = parseInt(document.getElementById('bautismo').value) || 0;
-            const culto = parseInt(document.getElementById('culto').value) || 0;
-
-            // Add points for number input categories
-            total += simple * 1;
-            total += significativo * 2;
-            total += estudio * 10;
-            total += invitados * 50;
-            total += bautismo * 500;
-            total += culto * 1000;
-
-            // Add or subtract points based on checkbox selections
-            if (document.getElementById('miPaginaCheck').checked) total += 25;
-            if (document.getElementById('prayDailyCheck').checked) total += 25;
-            if (document.getElementById('offlineEduCheck').checked) total += 50;
-            if (document.getElementById('diaDePrepararCheck').checked) total += 50;
-            if (document.getElementById('cartaMadreCheck').checked) total += 10;
-            if (document.getElementById('hongoCheck').checked) total += 500;
-            if (document.getElementById('guienoCheck').checked) total -= 500;
-            if (document.getElementById('tortugaRojaCheck').checked) total -= 100;
-
-            // Display total points
-            document.getElementById('totalPoints').innerText = total;
-
-            return total;
-        }
-
-        // Function to confirm and save user data
-        function confirmSubmission() {
-            const totalPoints = calculateTotal();
-            const userId = document.getElementById('memberNameSelect').value;
-            const date = document.getElementById('submissionDate').value;
-
-            if (!userId || !date) {
-                alert("Por favor, complete todos los campos requeridos.");
+            if (!newLocation) {
+                alert("Ubicación no puede estar vacía.");
                 return;
             }
 
-            const confirmation = confirm(`Está a punto de enviar los siguientes puntos totales: ${totalPoints}.
-¿Está seguro de que toda la información es correcta?`);
+            const userRef = database.ref(`users/${userId}`);
+            userRef.update({
+                location: newLocation,
+                points: newPoints
+            }).then(() => {
+                alert("Datos del usuario actualizados.");
+                loadUsers();
+            }).catch(error => {
+                console.error("Error al actualizar los datos del usuario:", error);
+                alert("Error al actualizar los datos del usuario. Consulte la consola para más detalles.");
+            });
+        }
+
+        // Eliminar usuario
+        function deleteUser(userId) {
+            const confirmation = confirm('¿Está seguro de que desea eliminar este usuario?');
             if (confirmation) {
-                saveUserData(totalPoints);
+                database.ref(`users/${userId}`).remove()
+                .then(() => {
+                    alert('Usuario eliminado correctamente.');
+                    loadUsers();
+                })
+                .catch(error => {
+                    console.error('Error al eliminar el usuario:', error);
+                    alert('Error al eliminar el usuario. Consulte la consola para más detalles.');
+                });
             }
         }
 
-        // Function to save user data and update leaderboard in Firebase
-        function saveUserData(totalPoints) {
-            const userId = document.getElementById('memberNameSelect').value;
-            const date = document.getElementById('submissionDate').value;
-
-            // Update points for existing user
-            const userRef = database.ref(`users/${userId}`);
-
-            userRef.once('value').then(snapshot => {
-                if (snapshot.exists()) {
-                    const currentPoints = snapshot.val().points || 0;
-                    userRef.update({
-                        points: currentPoints + totalPoints
-                    }).then(() => {
-                        alert("Puntos añadidos correctamente.");
-                        loadLeaderboard(); // Refresh leaderboard
-                    }).catch(error => {
-                        console.error("Error al actualizar los puntos:", error);
-                        alert("Error al actualizar los puntos. Consulte la consola para más detalles.");
-                    });
-                } else {
-                    alert("Usuario no encontrado.");
-                }
-            }).catch(error => {
-                console.error("Error al obtener el usuario:", error);
-                alert("Error al obtener el usuario. Consulte la consola para más detalles.");
-            });
-        }
-
-        // Function to load the leaderboard from Firebase
-        function loadLeaderboard() {
-            const usersRef = database.ref('users');
-
-            usersRef.once('value', (snapshot) => {
-                const leaderboardBodyMale = document.getElementById('leaderboardBodyMale');
-                const leaderboardBodyFemale = document.getElementById('leaderboardBodyFemale');
-                leaderboardBodyMale.innerHTML = '';
-                leaderboardBodyFemale.innerHTML = '';
-
-                if (!snapshot.exists()) {
-                    console.warn("No user data found.");
-                    return;
-                }
-
-                const maleUsers = [];
-                const femaleUsers = [];
-
-                snapshot.forEach(userSnapshot => {
-                    const user = userSnapshot.val();
-                    if (user.gender === 'Hermano') {
-                        maleUsers.push(user);
-                    } else if (user.gender === 'Hermana') {
-                        femaleUsers.push(user);
-                    }
-                });
-
-                // Sort users by points in descending order and get the top 10
-                maleUsers.sort((a, b) => b.points - a.points);
-                const topMaleUsers = maleUsers.slice(0, 10);
-                
-                femaleUsers.sort((a, b) => b.points - a.points);
-                const topFemaleUsers = femaleUsers.slice(0, 10);
-
-                // Populate male leaderboard
-                topMaleUsers.forEach((user, index) => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${index + 1}</td>
-                        <td class="top-scores">${user.points}</td>
-                        <td>${user.name}</td>
-                        <td>${user.location}</td>
-                    `;
-                    leaderboardBodyMale.appendChild(row);
-                });
-
-                // Populate female leaderboard
-                topFemaleUsers.forEach((user, index) => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${index + 1}</td>
-                        <td class="top-scores">${user.points}</td>
-                        <td>${user.name}</td>
-                        <td>${user.location}</td>
-                    `;
-                    leaderboardBodyFemale.appendChild(row);
-                });
-            }).catch(error => {
-                console.error("Error loading leaderboard:", error);
-                alert("Error al cargar la tabla de clasificación. Consulte la consola para más detalles.");
-            });
-        }
-
-        // Load existing users and leaderboard on page load
-        window.onload = function() {
-            loadExistingUsers();
-            loadLeaderboard();
-        };
+        // Cargar usuarios al cargar la página
+        window.onload = loadUsers;
     </script>
 </body>
 </html>
