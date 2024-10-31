@@ -169,8 +169,100 @@
             </fieldset>
 
             <!-- Point Inputs -->
-            <!-- Additional input fields as per your existing structure -->
+            <fieldset>
+                <legend>Ingresar Puntos</legend>
+                <div class="form-row">
+                    <label for="apacienta">APACIENTA (5)</label>
+                    <input type="number" id="apacienta" value="0">
+                </div>
+                <div class="form-row">
+                    <label for="firma">FIRMA (10)</label>
+                    <input type="number" id="firma" value="0">
+                </div>
+                <div class="form-row">
+                    <label for="videoSermon">VIDEO SERMON (10)</label>
+                    <input type="number" id="videoSermon" value="0">
+                </div>
+                <div class="form-row">
+                    <label for="libroPadre">LIBRO PADRE (10)</label>
+                    <input type="number" id="libroPadre" value="0">
+                </div>
+                <div class="form-row">
+                    <label for="libroPastor">LIBRO PASTOR (10)</label>
+                    <input type="number" id="libroPastor" value="0">
+                </div>
+                <div class="form-row">
+                    <label for="ag">AG (75)</label>
+                    <input type="number" id="ag" value="0">
+                </div>
+                <div class="form-row">
+                    <label for="edulms">EDULMS (200)</label>
+                    <input type="number" id="edulms" value="0">
+                </div>
+                <div class="form-row">
+                    <label for="simple">SIMPLE (1)</label>
+                    <input type="number" id="simple" value="0">
+                </div>
+                <div class="form-row">
+                    <label for="significativo">SIGNIFICATIVO (2)</label>
+                    <input type="number" id="significativo" value="0">
+                </div>
+                <div class="form-row">
+                    <label for="estudio">ESTUDIO (10)</label>
+                    <input type="number" id="estudio" value="0">
+                </div>
+                <div class="form-row">
+                    <label for="invitados">INVITADOS (50)</label>
+                    <input type="number" id="invitados" value="0">
+                </div>
+                <div class="form-row">
+                    <label for="bautismo">BAUTISMO (500)</label>
+                    <input type="number" id="bautismo" value="0">
+                </div>
+                <div class="form-row">
+                    <label for="culto">CULTO (1000)</label>
+                    <input type="number" id="culto" value="0">
+                </div>
+            </fieldset>
 
+            <!-- Checkbox Input Fields -->
+            <fieldset>
+                <legend>Entradas de Checkbox</legend>
+                <div class="form-row">
+                    <label for="miPaginaCheck">MI PÁGINA (25)</label>
+                    <input type="checkbox" id="miPaginaCheck">
+                </div>
+                <div class="form-row">
+                    <label for="prayDailyCheck">ORACIÓN DIARIA (25)</label>
+                    <input type="checkbox" id="prayDailyCheck">
+                </div>
+                <div class="form-row">
+                    <label for="offlineEduCheck">OFFLINE EDU (50)</label>
+                    <input type="checkbox" id="offlineEduCheck">
+                </div>
+                <div class="form-row">
+                    <label for="diaDePrepararCheck">DÍA DE PREPARAR (50)</label>
+                    <input type="checkbox" id="diaDePrepararCheck">
+                </div>
+                <div class="form-row">
+                    <label for="cartaMadreCheck">CARTA A MADRE (10)</label>
+                    <input type="checkbox" id="cartaMadreCheck">
+                </div>
+                <div class="form-row">
+                    <label for="hongoCheck">HONGO (500)</label>
+                    <input type="checkbox" id="hongoCheck">
+                </div>
+                <div class="form-row">
+                    <label for="guienoCheck">GUIENO (-500)</label>
+                    <input type="checkbox" id="guienoCheck">
+                </div>
+                <div class="form-row">
+                    <label for="tortugaRojaCheck">TORTUGA ROJA (-100)</label>
+                    <input type="checkbox" id="tortugaRojaCheck">
+                </div>
+            </fieldset>
+
+            <!-- Button to calculate total points -->
             <button type="button" onclick="confirmSubmission()">Calcular Puntos Totales y Guardar</button>
         </form>
 
@@ -178,7 +270,39 @@
         <h2>Puntos Totales: <span id="totalPoints">0</span></h2>
 
         <!-- Leaderboard Section -->
-        <!-- Leaderboard table structure as per your existing structure -->
+        <div class="leaderboard">
+            <h2>Clasificación General - Hermano</h2>
+            <table id="leaderboardTableMale">
+                <thead>
+                    <tr>
+                        <th>RANGO</th>
+                        <th>Top Scores</th>
+                        <th>Top 10 Participants</th>
+                        <th>Top 10 Locations</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboardBodyMale">
+                    <!-- Rankings will be populated here -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="leaderboard">
+            <h2>Clasificación General - Hermana</h2>
+            <table id="leaderboardTableFemale">
+                <thead>
+                    <tr>
+                        <th>RANGO</th>
+                        <th>Top Scores</th>
+                        <th>Top 10 Participants</th>
+                        <th>Top 10 Locations</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboardBodyFemale">
+                    <!-- Rankings will be populated here -->
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <script>
