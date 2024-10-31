@@ -105,9 +105,29 @@
             font-weight: bold;
             color: #ff6347;
         }
+
+        .top-nav {
+            background-color: #007bff;
+            padding: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .top-nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.2rem;
+        }
+
+        .top-nav a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
+    <div class="top-nav">
+        <a href="https://manny1994rd.github.io/points-tracker/admin.html">Admin Panel</a>
+    </div>
     <div class="container">
         <h1>Formulario de Envío de Puntos</h1>
 
@@ -324,6 +344,100 @@
                     option.style.display = "none";
                 }
             }
+        }
+
+        // Function to calculate total points
+        function calculateTotal() {
+            let total = 0;
+
+            const pointsConfig = [
+                { id: 'apacienta', multiplier: 5 },
+                { id: 'firma', multiplier: 10 },
+                { id: 'videoSermon', multiplier: 10 },
+                { id: 'libroPadre', multiplier: 10 },
+                { id: 'libroPastor', multiplier: 10 },
+                { id: 'ag', multiplier: 75 },
+                { id: 'edulms', multiplier: 200 },
+                { id: 'simple', multiplier: 1 },
+                { id: 'significativo', multiplier: 2 },
+                { id: 'estudio', multiplier: 10 },
+                { id: 'invitados', multiplier: 50 },
+                { id: 'bautismo', multiplier: 500 },
+                { id: 'culto', multiplier: 1000 }
+            ];
+
+            pointsConfig.forEach(config => {
+                const value = parseInt(document.getElementById(config.id).value) || 0;
+                total += value * config.multiplier;
+            });
+
+            const checkboxConfig = [
+                { id: 'miPaginaCheck', points: 25 },
+                { id: 'prayDailyCheck', points: 25 },
+                { id: 'offlineEduCheck', points: 50 },
+                { id: 'diaDePrepararCheck', points: 50 },
+                { id: 'cartaMadreCheck', points: 10 },
+                { id: 'hongoCheck', points: 500 },
+                { id: 'guienoCheck', points: -500 },
+                { id: 'tortugaRojaCheck', points: -100 }
+            ];
+
+            checkboxConfig.forEach(config => {
+                if (document.getElementById(config.id).checked) {
+                    total += config.points;
+                }
+            });
+
+            document.getElementById('totalPoints').innerText = total;
+
+            return total;
+        }
+
+        // Function to confirm and save user data
+        function confirmSubmission() {
+            const totalPoints = calculateTotal();
+            const userId = document.getElementById('memberNameSelect').value;
+            const date = document.getElementById('submissionDate').value;
+
+            if (!userId || !date) {
+                alert("Por favor, complete todos los campos requeridos.");
+                return;
+            }
+
+            const confirmation = confirm(`Está a punto de enviar los siguientes puntos totales: ${totalPoints}.
+¿Está seguro de que toda la información es correcta?`);
+            if (confirmation) {
+                saveUserData(totalPoints);
+            }
+        }
+
+        // Function to save user data and update leaderboard in Firebase
+        function saveUserData(totalPoints) {
+            const userId = document.getElementById('memberNameSelect').value;
+            const date = document.getElementById('submissionDate').value;
+
+            // Update points for existing user
+            const userRef = database.ref(`users/${userId}`);
+
+            userRef.once('value').then(snapshot => {
+                if (snapshot.exists()) {
+                    const currentPoints = snapshot.val().points || 0;
+                    userRef.update({
+                        points: currentPoints + totalPoints
+                    }).then(() => {
+                        alert("Puntos añadidos correctamente.");
+                        loadLeaderboard(); // Refresh leaderboard
+                    }).catch(error => {
+                        console.error("Error al actualizar los puntos:", error);
+                        alert("Error al actualizar los puntos. Consulte la consola para más detalles.");
+                    });
+                } else {
+                    alert("Usuario no encontrado.");
+                }
+            }).catch(error => {
+                console.error("Error al obtener el usuario:", error);
+                alert("Error al obtener el usuario. Consulte la consola para más detalles.");
+            });
         }
 
         // Load users on page load
