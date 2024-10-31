@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Puntos y Clasificación</title>
+    <!-- Firebase App (Firebase v9 Compatibility Mode) -->
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+    <style>
+        /* General Styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .form-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: nowrap;
+        }
+
+        label {
+            font-size: 1rem;
+            color: #555;
+            flex: 1;
+            white-space: nowrap;
+        }
+
+        input[type="number"], select {
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 40%;
+            flex: 1;
+        }
+
+        button {
+            padding: 15px;
+            font-size: 1rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .leaderboard {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+            text-align: center;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .top-scores {
+            font-weight: bold;
+            color: #ff6347;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Formulario de Envío de Puntos</h1>
+
+        <!-- Formulario -->
+        <form id="pointsForm">
+            <!-- Personal Information -->
+            <div class="form-row">
+                <label for="genderSelect">Seleccionar Género</label>
+                <select id="genderSelect" onchange="filterUsersByGender()">
+                    <option value="">Seleccionar género</option>
+                    <option value="Hermano">Hermano</option>
+                    <option value="Hermana">Hermana</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label for="memberNameSelect">Seleccionar Miembro</label>
+                <select id="memberNameSelect">
+                    <option value="">Seleccionar miembro</option>
+                    <!-- Existing users will be populated here -->
+                </select>
+            </div>
+            <div class="form-row">
+                <label for="submissionDate">Fecha</label>
+                <input type="date" id="submissionDate" required>
+            </div>
+
+            $1            <div class="form-row">
+                <label for="apacienta">APACIENTA (5)</label>
+                <input type="number" id="apacienta" value="0">
+            </div>
+            <div class="form-row">
+                <label for="firma">FIRMA (10)</label>
+                <input type="number" id="firma" value="0">
+            </div>
+            <div class="form-row">
+                <label for="videoSermon">VIDEO SERMON (10)</label>
+                <input type="number" id="videoSermon" value="0">
+            </div>
+            <div class="form-row">
+                <label for="libroPadre">LIBRO PADRE (10)</label>
+                <input type="number" id="libroPadre" value="0">
+            </div>
+            <div class="form-row">
+                <label for="libroPastor">LIBRO PASTOR (10)</label>
+                <input type="number" id="libroPastor" value="0">
+            </div>
+            <div class="form-row">
+                <label for="ag">AG (75)</label>
+                <input type="number" id="ag" value="0">
+            </div>
+            <div class="form-row">
+                <label for="edulms">EDULMS (200)</label>
+                <input type="number" id="edulms" value="0">
+            </div>
+            <div class="form-row">
+                <label for="simple">SIMPLE (1)</label>
+                <input type="number" id="simple" value="0">
+            </div>
+            <div class="form-row">
+                <label for="significativo">SIGNIFICATIVO (2)</label>
+                <input type="number" id="significativo" value="0">
+            </div>
+            <div class="form-row">
+                <label for="estudio">ESTUDIO (10)</label>
+                <input type="number" id="estudio" value="0">
+            </div>
+            <div class="form-row">
+                <label for="invitados">INVITADOS (50)</label>
+                <input type="number" id="invitados" value="0">
+            </div>
+            <div class="form-row">
+                <label for="bautismo">BAUTISMO (500)</label>
+                <input type="number" id="bautismo" value="0">
+            </div>
+            <div class="form-row">
+                <label for="culto">CULTO (1000)</label>
+                <input type="number" id="culto" value="0">
+            </div>
+
+            <!-- Checkbox Input Fields -->
+            <div class="form-row">
+                <label for="miPaginaCheck">MI PÁGINA (25)</label>
+                <input type="checkbox" id="miPaginaCheck">
+            </div>
+            <div class="form-row">
+                <label for="prayDailyCheck">ORACIÓN DIARIA (25)</label>
+                <input type="checkbox" id="prayDailyCheck">
+            </div>
+            <div class="form-row">
+                <label for="offlineEduCheck">OFFLINE EDU (50)</label>
+                <input type="checkbox" id="offlineEduCheck">
+            </div>
+            <div class="form-row">
+                <label for="diaDePrepararCheck">DÍA DE PREPARAR (50)</label>
+                <input type="checkbox" id="diaDePrepararCheck">
+            </div>
+            <div class="form-row">
+                <label for="cartaMadreCheck">CARTA A MADRE (10)</label>
+                <input type="checkbox" id="cartaMadreCheck">
+            </div>
+            <div class="form-row">
+                <label for="hongoCheck">HONGO (500)</label>
+                <input type="checkbox" id="hongoCheck">
+            </div>
+            <div class="form-row">
+                <label for="guienoCheck">GUIENO (-500)</label>
+                <input type="checkbox" id="guienoCheck">
+            </div>
+            <div class="form-row">
+                <label for="tortugaRojaCheck">TORTUGA ROJA (-100)</label>
+                <input type="checkbox" id="tortugaRojaCheck">
+            </div>
+
+            <!-- Button to calculate total points -->
+            <button type="button" onclick="confirmSubmission()">Calcular Puntos Totales y Guardar</button>
+        </form>
+
+        <!-- Display total points -->
+        <h2>Puntos Totales: <span id="totalPoints">0</span></h2>
+
+        <!-- Leaderboard Section -->
+        <div class="leaderboard">
+            <h2>Clasificación General - Hermano</h2>
+            <table id="leaderboardTableMale">
+                <thead>
+                    <tr>
+                        <th>RANGO</th>
+                        <th>Top Scores</th>
+                        <th>Top 10 Participants</th>
+                        <th>Top 10 Locations</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboardBodyMale">
+                    <!-- Rankings will be populated here -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="leaderboard">
+            <h2>Clasificación General - Hermana</h2>
+            <table id="leaderboardTableFemale">
+                <thead>
+                    <tr>
+                        <th>RANGO</th>
+                        <th>Top Scores</th>
+                        <th>Top 10 Participants</th>
+                        <th>Top 10 Locations</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboardBodyFemale">
+                    <!-- Rankings will be populated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDRddA_EeZvCMZS5qQAi4pkYtOR_Xblib8",
+            authDomain: "mario-racer.firebaseapp.com",
+            databaseURL: "https://mario-racer-default-rtdb.firebaseio.com",
+            projectId: "mario-racer",
+            storageBucket: "mario-racer.appspot.com",
+            messagingSenderId: "373143059252",
+            appId: "1:373143059252:web:5dc28e804781ff688d8361",
+            measurementId: "G-FM47SXM2G0"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Load existing users into the dropdown based on selected gender
+        function loadExistingUsers() {
+            const memberNameSelect = document.getElementById('memberNameSelect');
+            memberNameSelect.innerHTML = '<option value="">Seleccionar miembro</option>'; // Reset options
+
+            database.ref('users').once('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    snapshot.forEach(userSnapshot => {
+                        const user = userSnapshot.val();
+                        const option = document.createElement('option');
+                        option.value = userSnapshot.key;
+                        option.textContent = `${user.name} - ${user.location}`;
+                        option.dataset.gender = user.gender;
+                        memberNameSelect.appendChild(option);
+                    });
+                }
+            });
+        }
+
+        // Filter users based on selected gender
+        function filterUsersByGender() {
+            const gender = document.getElementById('genderSelect').value;
+            const memberNameSelect = document.getElementById('memberNameSelect');
+
+            for (let i = 0; i < memberNameSelect.options.length; i++) {
+                const option = memberNameSelect.options[i];
+                if (option.value === "") continue;
+
+                if (option.dataset.gender === gender || gender === "") {
+                    option.style.display = "block";
+                } else {
+                    option.style.display = "none";
+                }
+            }
+        }
+
+        // Function to calculate total points
+        function calculateTotal() {
+            let total = 0;
+
+            // Parse inputs as integers and handle empty or invalid input as 0
+            const simple = parseInt(document.getElementById('simple').value) || 0;
+            const significativo = parseInt(document.getElementById('significativo').value) || 0;
+            const estudio = parseInt(document.getElementById('estudio').value) || 0;
+            const invitados = parseInt(document.getElementById('invitados').value) || 0;
+            const bautismo = parseInt(document.getElementById('bautismo').value) || 0;
+            const culto = parseInt(document.getElementById('culto').value) || 0;
+
+            $1
+            const apacienta = parseInt(document.getElementById('apacienta').value) || 0;
+            const firma = parseInt(document.getElementById('firma').value) || 0;
+            const videoSermon = parseInt(document.getElementById('videoSermon').value) || 0;
+            const libroPadre = parseInt(document.getElementById('libroPadre').value) || 0;
+            const libroPastor = parseInt(document.getElementById('libroPastor').value) || 0;
+            const ag = parseInt(document.getElementById('ag').value) || 0;
+            const edulms = parseInt(document.getElementById('edulms').value) || 0;
+
+            total += apacienta * 5;
+            total += firma * 10;
+            total += videoSermon * 10;
+            total += libroPadre * 10;
+            total += libroPastor * 10;
+            total += ag * 75;
+            total += edulms * 200;
+
+            // Add or subtract points based on checkbox selections
+            if (document.getElementById('miPaginaCheck').checked) total += 25;
+            if (document.getElementById('prayDailyCheck').checked) total += 25;
+            if (document.getElementById('offlineEduCheck').checked) total += 50;
+            if (document.getElementById('diaDePrepararCheck').checked) total += 50;
+            if (document.getElementById('cartaMadreCheck').checked) total += 10;
+            if (document.getElementById('hongoCheck').checked) total += 500;
+            if (document.getElementById('guienoCheck').checked) total -= 500;
+            if (document.getElementById('tortugaRojaCheck').checked) total -= 100;
+
+            // Display total points
+            document.getElementById('totalPoints').innerText = total;
+
+            return total;
+        }
+
+        // Function to confirm and save user data
+        function confirmSubmission() {
+            const totalPoints = calculateTotal();
+            const userId = document.getElementById('memberNameSelect').value;
+            const date = document.getElementById('submissionDate').value;
+
+            if (!userId || !date) {
+                alert("Por favor, complete todos los campos requeridos.");
+                return;
+            }
+
+            const confirmation = confirm(`Está a punto de enviar los siguientes puntos totales: ${totalPoints}.
+¿Está seguro de que toda la información es correcta?`);
+            if (confirmation) {
+                saveUserData(totalPoints);
+            }
+        }
+
+        // Function to save user data and update leaderboard in Firebase
+        function saveUserData(totalPoints) {
+            const userId = document.getElementById('memberNameSelect').value;
+            const date = document.getElementById('submissionDate').value;
+
+            // Update points for existing user
+            const userRef = database.ref(`users/${userId}`);
+
+            userRef.once('value').then(snapshot => {
+                if (snapshot.exists()) {
+                    const currentPoints = snapshot.val().points || 0;
+                    userRef.update({
+                        points: currentPoints + totalPoints
+                    }).then(() => {
+                        alert("Puntos añadidos correctamente.");
+                        loadLeaderboard(); // Refresh leaderboard
+                    }).catch(error => {
+                        console.error("Error al actualizar los puntos:", error);
+                        alert("Error al actualizar los puntos. Consulte la consola para más detalles.");
+                    });
+                } else {
+                    alert("Usuario no encontrado.");
+                }
+            }).catch(error => {
+                console.error("Error al obtener el usuario:", error);
+                alert("Error al obtener el usuario. Consulte la consola para más detalles.");
+            });
+        }
+
+        // Function to load the leaderboard from Firebase
+        function loadLeaderboard() {
+            const usersRef = database.ref('users');
+
+            usersRef.once('value', (snapshot) => {
+                const leaderboardBodyMale = document.getElementById('leaderboardBodyMale');
+                const leaderboardBodyFemale = document.getElementById('leaderboardBodyFemale');
+                leaderboardBodyMale.innerHTML = '';
+                leaderboardBodyFemale.innerHTML = '';
+
+                if (!snapshot.exists()) {
+                    console.warn("No user data found.");
+                    return;
+                }
+
+                const maleUsers = [];
+                const femaleUsers = [];
+
+                snapshot.forEach(userSnapshot => {
+                    const user = userSnapshot.val();
+                    if (user.gender === 'Hermano') {
+                        maleUsers.push(user);
+                    } else if (user.gender === 'Hermana') {
+                        femaleUsers.push(user);
+                    }
+                });
+
+                // Sort users by points in descending order and get the top 10
+                maleUsers.sort((a, b) => b.points - a.points);
+                const topMaleUsers = maleUsers;
+                
+                femaleUsers.sort((a, b) => b.points - a.points);
+                const topFemaleUsers = femaleUsers;
+
+                // Populate male leaderboard
+                topMaleUsers.forEach((user, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td class="top-scores">${user.points}</td>
+                        <td>${user.name}</td>
+                        <td>${user.location}</td>
+                    `;
+                    leaderboardBodyMale.appendChild(row);
+                });
+
+                // Populate female leaderboard
+                topFemaleUsers.forEach((user, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td class="top-scores">${user.points}</td>
+                        <td>${user.name}</td>
+                        <td>${user.location}</td>
+                    `;
+                    leaderboardBodyFemale.appendChild(row);
+                });
+            }).catch(error => {
+                console.error("Error loading leaderboard:", error);
+                alert("Error al cargar la tabla de clasificación. Consulte la consola para más detalles.");
+            });
+        }
+
+        // Load existing users and leaderboard on page load
+        window.onload = function() {
+            loadExistingUsers();
+            loadLeaderboard();
+        };
+    </script>
+</body>
+</html>
