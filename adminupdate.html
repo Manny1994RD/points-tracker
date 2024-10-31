@@ -229,6 +229,7 @@
                     snapshot.forEach(userSnapshot => {
                         const user = userSnapshot.val();
                         const row = document.createElement('tr');
+                        row.setAttribute('data-user-id', userSnapshot.key);
                         row.innerHTML = `
                             <td>${user.name}</td>
                             <td>${user.location}</td>
@@ -245,36 +246,31 @@
 
         // Editar usuario
         function editUser(userId, currentName, currentLocation, currentPoints) {
-            const userRow = document.querySelector(`button[onclick="editUser('${userId}', '${currentName}', '${currentLocation}', ${currentPoints})"]`).closest('tr');
+            const userRow = document.querySelector(`tr[data-user-id="${userId}"]`);
             const editFormHtml = `
-                <div class="form-row">
-                    <label for="editUserName">Nuevo Nombre</label>
-                    <input type="text" id="editUserName" value="${currentName}">
-                </div>
-                <div class="form-row">
-                    <label for="editUserLocation">Nueva Ubicación</label>
-                    <select id="editUserLocation">
+                <td><input type="text" id="editUserName_${userId}" value="${currentName}"></td>
+                <td>
+                    <select id="editUserLocation_${userId}">
                         <option value="Santiago" ${currentLocation === 'Santiago' ? 'selected' : ''}>Santiago</option>
                         <option value="La Vega" ${currentLocation === 'La Vega' ? 'selected' : ''}>La Vega</option>
                         <option value="Moca" ${currentLocation === 'Moca' ? 'selected' : ''}>Moca</option>
                         <option value="Puerto Plata" ${currentLocation === 'Puerto Plata' ? 'selected' : ''}>Puerto Plata</option>
                         <option value="Jarabacoa" ${currentLocation === 'Jarabacoa' ? 'selected' : ''}>Jarabacoa</option>
                     </select>
-                </div>
-                <div class="form-row">
-                    <label for="editUserPoints">Nuevos Puntos</label>
-                    <input type="number" id="editUserPoints" value="${currentPoints}">
-                </div>
-                <button type="button" onclick="saveUserEdit('${userId}')">Guardar Cambios</button>
+                </td>
+                <td>${userRow.children[2].innerHTML}</td>
+                <td><input type="number" id="editUserPoints_${userId}" value="${currentPoints}"></td>
+                <td><button type="button" onclick="saveUserEdit('${userId}')">Guardar Cambios</button></td>
+                <td><button onclick="deleteUser('${userId}')">Eliminar</button></td>
             `;
             userRow.innerHTML = editFormHtml;
         }
 
         // Guardar los cambios del usuario editado
         function saveUserEdit(userId) {
-            const newName = document.getElementById('editUserName').value.trim();
-            const newLocation = document.getElementById('editUserLocation').value;
-            const newPoints = parseInt(document.getElementById('editUserPoints').value) || 0;
+            const newName = document.getElementById(`editUserName_${userId}`).value.trim();
+            const newLocation = document.getElementById(`editUserLocation_${userId}`).value;
+            const newPoints = parseInt(document.getElementById(`editUserPoints_${userId}`).value) || 0;
 
             if (!newName) {
                 alert("El nombre no puede estar vacío.");
