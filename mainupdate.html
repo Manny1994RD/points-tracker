@@ -213,7 +213,7 @@
 
         <!-- Avatar and Progress Bar -->
         <div class="avatar-container">
-            <div class="avatar">
+            <div class="avatar" id="userAvatar">
                 U
                 <div class="avatar-level" id="userLevel">1</div>
             </div>
@@ -233,8 +233,8 @@
                     <tr>
                         <th>RANGO</th>
                         <th>Top Scores</th>
-                        <th>Top 10 Participants</th>
-                        <th>Top 10 Locations</th>
+                        <th>Participantes</th>
+                        <th>Ubicación</th>
                     </tr>
                 </thead>
                 <tbody id="leaderboardBodyMale">
@@ -250,8 +250,8 @@
                     <tr>
                         <th>RANGO</th>
                         <th>Top Scores</th>
-                        <th>Top 10 Participants</th>
-                        <th>Top 10 Locations</th>
+                        <th>Participantes</th>
+                        <th>Ubicación</th>
                     </tr>
                 </thead>
                 <tbody id="leaderboardBodyFemale">
@@ -346,4 +346,120 @@
             return total;
         }
 
-       
+        // Function to confirm and save user data
+        function confirmSubmission() {
+            const totalPoints = calculateTotal();
+            const userId = document.getElementById('memberNameSelect').value;
+            const date = document.getElementById('submissionDate').value;
+
+            if (!userId || !date) {
+                toastr.error("Por favor, complete todos los campos requeridos.");
+                return;
+            }
+
+            const confirmation = confirm(`Está a punto de enviar los siguientes puntos totales: ${totalPoints}.
+¿Está seguro de que toda la información es correcta?`);
+            if (confirmation) {
+                saveUserData(totalPoints);
+            }
+        }
+
+        // Function to save user data and update leaderboard in Firebase
+        function saveUserData(totalPoints) {
+            const userId = document.getElementById('memberNameSelect').value;
+
+            // Update points for existing user
+            const userRef = database.ref(`users/${userId}`);
+
+            userRef.once('value').then(snapshot => {
+                if (snapshot.exists()) {
+                    const currentPoints = snapshot.val().points || 0;
+                    userRef.update({
+                        points: currentPoints + totalPoints
+                    }).then(() => {
+                        toastr.success("Puntos añadidos correctamente.");
+                        loadLeaderboard(); // Refresh leaderboard
+                    }).catch(error => {
+                        console.error("Error al actualizar los puntos:", error);
+                        toastr.error("Error al actualizar los puntos. Consulte la consola para más detalles.");
+                    });
+                } else {
+                    toastr.error("Usuario no encontrado.");
+                }
+            }).catch(error => {
+                console.error("Error al obtener el usuario:", error);
+                toastr.error("Error al obtener el usuario. Consulte la consola para más detalles.");
+            });
+        }
+
+        // Function to load the leaderboard from Firebase
+        function loadLeaderboard() {
+            const usersRef = database.ref('users');
+
+            usersRef.once('value', (snapshot) => {
+                const leaderboardBodyMale = document.getElementById('leaderboardBodyMale');
+                const leaderboardBodyFemale = document.getElementById('leaderboardBodyFemale');
+                leaderboardBodyMale.innerHTML = '';
+                leaderboardBodyFemale.innerHTML = '';
+
+                if (!snapshot.exists()) {
+                    console.warn("No user data found.");
+                    return;
+                }
+
+                const maleUsers = [];
+                const femaleUsers = [];
+
+                snapshot.forEach(userSnapshot => {
+                    const user = userSnapshot.val();
+                    if (user.gender === 'Hermano') {
+                        maleUsers.push(user);
+                    } else if (user.gender === 'Hermana') {
+                        femaleUsers.push(user);
+                    }
+                });
+
+                // Sort users by points in descending order and get the top 10
+                maleUsers.sort((a, b) => b.points - a.points);
+                const topMaleUsers = maleUsers.slice(0, 10);
+
+                femaleUsers.sort((a, b) => b.points - a.points);
+                const topFemaleUsers = femaleUsers.slice(0, 10);
+
+                // Populate male leaderboard
+                topMaleUsers.forEach((user, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td class="top-scores">${user.points}</td>
+                        <td>${user.name}</td>
+                        <td>${user.location}</td>
+                    `;
+                    leaderboardBodyMale.appendChild(row);
+                });
+
+                // Populate female leaderboard
+                topFemaleUsers.forEach((user, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td class="top-scores">${user.points}</td>
+                        <td>${user.name}</td>
+                        <td>${user.location}</td>
+                    `;
+                    leaderboardBodyFemale.appendChild(row);
+                });
+            }).catch(error => {
+                console.error("Error loading leaderboard:", error);
+                toastr.error("Error al cargar la tabla de clasificación. Consulte la consola para más detalles.");
+            });
+        }
+
+        // Load existing users and leaderboard on page load
+        window.onload = function() {
+            loadExistingUsers();
+            loadLeaderboard();
+        };
+    </script>
+</body>
+</html>
