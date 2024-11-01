@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - Gestión de Usuarios</title>
     <style>
-        /* Styling for the form and table */
-        /* (Insert your CSS styles here) */
+        /* Your existing CSS styles here */
     </style>
 </head>
 <body>
@@ -19,7 +18,7 @@
     </div>
 
     <!-- Admin Panel Content -->
-    <div id="adminPanel" class="container">
+    <div id="adminPanel" class="container" style="display: none;">
         <h1>Admin Panel - Gestión de Usuarios</h1>
 
         <!-- Formulario para Crear Nuevo Usuario -->
@@ -132,7 +131,7 @@
                         <td>${user.location}</td>
                         <td>${user.gender}</td>
                         <td>${user.points}</td>
-                        <td><button onclick="editUser('${userSnapshot.key}')">Editar</button></td>
+                        <td><button onclick="editUser('${userSnapshot.key}', '${user.name}', '${user.location}', ${user.points})">Editar</button></td>
                         <td><button onclick="deleteUser('${userSnapshot.key}')">Eliminar</button></td>
                     `;
                     userListBody.appendChild(row);
@@ -140,25 +139,21 @@
             });
         }
 
-        function editUser(userId) {
+        function editUser(userId, currentName, currentLocation, currentPoints) {
             const row = document.querySelector(`tr[data-user-id="${userId}"]`);
-            const name = row.children[0].textContent;
-            const location = row.children[1].textContent;
-            const points = row.children[3].textContent;
-
             row.innerHTML = `
-                <td><input type="text" id="editUserName_${userId}" value="${name}"></td>
+                <td><input type="text" id="editUserName_${userId}" value="${currentName}"></td>
                 <td>
                     <select id="editUserLocation_${userId}">
-                        <option value="Santiago" ${location === 'Santiago' ? 'selected' : ''}>Santiago</option>
-                        <option value="La Vega" ${location === 'La Vega' ? 'selected' : ''}>La Vega</option>
-                        <option value="Moca" ${location === 'Moca' ? 'selected' : ''}>Moca</option>
-                        <option value="Puerto Plata" ${location === 'Puerto Plata' ? 'selected' : ''}>Puerto Plata</option>
-                        <option value="Jarabacoa" ${location === 'Jarabacoa' ? 'selected' : ''}>Jarabacoa</option>
+                        <option value="Santiago" ${currentLocation === 'Santiago' ? 'selected' : ''}>Santiago</option>
+                        <option value="La Vega" ${currentLocation === 'La Vega' ? 'selected' : ''}>La Vega</option>
+                        <option value="Moca" ${currentLocation === 'Moca' ? 'selected' : ''}>Moca</option>
+                        <option value="Puerto Plata" ${currentLocation === 'Puerto Plata' ? 'selected' : ''}>Puerto Plata</option>
+                        <option value="Jarabacoa" ${currentLocation === 'Jarabacoa' ? 'selected' : ''}>Jarabacoa</option>
                     </select>
                 </td>
                 <td>${row.children[2].innerHTML}</td>
-                <td><input type="number" id="editUserPoints_${userId}" value="${points}"></td>
+                <td><input type="number" id="editUserPoints_${userId}" value="${currentPoints}"></td>
                 <td><button onclick="saveUserEdit('${userId}')">Guardar</button></td>
                 <td><button onclick="deleteUser('${userId}')">Eliminar</button></td>
             `;
@@ -181,7 +176,7 @@
                 points: newPoints
             }).then(() => {
                 alert("Datos del usuario actualizados.");
-                loadUsers();
+                loadUsers(); // Reload users to refresh the table view
             }).catch(error => {
                 console.error("Error al actualizar los datos del usuario:", error);
                 alert("Error al actualizar los datos del usuario. Consulte la consola para más detalles.");
