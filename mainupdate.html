@@ -387,6 +387,151 @@
             }
         }
 
+        function loadLeaderboard() {
+            const usersRef = database.ref('users');
+
+            usersRef.once('value', (snapshot) => {
+                const leaderboardBodyMale = document.getElementById('leaderboardBodyMale');
+                const leaderboardBodyFemale = document.getElementById('leaderboardBodyFemale');
+                leaderboardBodyMale.innerHTML = '';
+                leaderboardBodyFemale.innerHTML = '';
+
+                if (!snapshot.exists()) {
+                    console.warn("No user data found.");
+                    return;
+                }
+
+                const maleUsers = [];
+                const femaleUsers = [];
+
+                snapshot.forEach(userSnapshot => {
+                    const user = userSnapshot.val();
+                    if (user.gender === 'Hermano') {
+                        maleUsers.push(user);
+                    } else if (user.gender === 'Hermana') {
+                        femaleUsers.push(user);
+                    }
+                });
+
+                maleUsers.sort((a, b) => b.points - a.points);
+                const topMaleUsers = maleUsers.slice(0, 10);
+
+                femaleUsers.sort((a, b) => b.points - a.points);
+                const topFemaleUsers = femaleUsers.slice(0, 10);
+
+                topMaleUsers.forEach((user, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td class="top-scores">${user.points}</td>
+                        <td>${user.name}</td>
+                        <td>${user.location}</td>
+                    `;
+                    leaderboardBodyMale.appendChild(row);
+                });
+
+                topFemaleUsers.forEach((user, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td class="top-scores">${user.points}</td>
+                        <td>${user.name}</td>
+                        <td>${user.location}</td>
+                    `;
+                    leaderboardBodyFemale.appendChild(row);
+                });
+            }).catch(error => {
+                console.error("Error loading leaderboard:", error);
+                alert("Error al cargar la tabla de clasificación. Consulte la consola para más detalles.");
+            });
+        }
+
+        function confirmSubmission() {
+            const totalPoints = calculateTotal();
+            const userId = document.getElementById('memberNameSelect').value;
+            const date = document.getElementById('submissionDate').value;
+
+            if (!userId || !date) {
+                alert("Por favor, complete todos los campos requeridos.");
+                return;
+            }
+
+            const confirmation = confirm(`Está a punto de enviar los siguientes puntos totales: ${totalPoints}.\n¿Está seguro de que toda la información es correcta?`);
+            if (confirmation) {
+                saveUserData(userId, totalPoints, date);
+            }
+        }
+
+        function calculateTotal() {
+            let total = 0;
+
+            const pointsConfig = [
+                { id: 'apacienta', multiplier: 5 },
+                { id: 'firma', multiplier: 10 },
+                { id: 'videoSermon', multiplier: 10 },
+                { id: 'libroPadre', multiplier: 10 },
+                { id: 'libroPastor', multiplier: 10 },
+                { id: 'ag', multiplier: 75 },
+                { id: 'edulms', multiplier: 200 },
+                { id: 'simple', multiplier: 1 },
+                { id: 'significativo', multiplier: 2 },
+                { id: 'estudio', multiplier: 10 },
+                { id: 'invitados', multiplier: 50 },
+                { id: 'bautismo', multiplier: 500 },
+                { id: 'culto', multiplier: 1000 }
+            ];
+
+            pointsConfig.forEach(config => {
+                const value = parseInt(document.getElementById(config.id).value) || 0;
+                total += value * config.multiplier;
+            });
+
+            const checkboxConfig = [
+                { id: 'miPaginaCheck', points: 25 },
+                { id: 'prayDailyCheck', points: 25 },
+                { id: 'offlineEduCheck', points: 50 },
+                { id: 'diaDePrepararCheck', points: 50 },
+                { id: 'cartaMadreCheck', points: 10 },
+                { id: 'hongoCheck', points: 500 },
+                { id: 'guienoCheck', points: -500 },
+                { id: 'tortugaRojaCheck', points: -100 }
+            ];
+
+            checkboxConfig.forEach(config => {
+                if (document.getElementById(config.id).checked) {
+                    total += config.points;
+                }
+            });
+
+            document.getElementById('totalPoints').innerText = total;
+            return total;
+        }
+
+        function saveUserData(userId, totalPoints, date) {
+            const userRef = database.ref(`users/${userId}`);
+
+            userRef.once('value').then(snapshot => {
+                if (snapshot.exists()) {
+                    const currentPoints = snapshot.val().points || 0;
+                    userRef.update({
+                        points: currentPoints + totalPoints,
+                        lastSubmissionDate: date
+                    }).then(() => {
+                        alert("Puntos añadidos correctamente.");
+                        loadLeaderboard();
+                    }).catch(error => {
+                        console.error("Error al actualizar los puntos:", error);
+                        alert("Error al actualizar los puntos. Consulte la consola para más detalles.");
+                    });
+                } else {
+                    alert("Usuario no encontrado.");
+                }
+            }).catch(error => {
+                console.error("Error al obtener el usuario:", error);
+                alert("Error al obtener el usuario. Consulte la consola para más detalles.");
+            });
+        }
+
         window.onload = function() {
             loadExistingUsers();
             loadLeaderboard();
