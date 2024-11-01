@@ -96,8 +96,8 @@
                 <label for="genderFilter">Gender:</label>
                 <select id="genderFilter" onchange="applyFilters()">
                     <option value="">All</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
+                    <option value="Hermano">Hermano</option>
+                    <option value="Hermana">Hermana</option>
                 </select>
             </div>
 
@@ -150,7 +150,7 @@
             authDomain: "mario-racer.firebaseapp.com",
             databaseURL: "https://mario-racer-default-rtdb.firebaseio.com",
             projectId: "mario-racer",
-            storageBucket: "mario-racer.appspot.com",
+            storageBucket: "mario-racer.firebasestorage.app",
             messagingSenderId: "373143059252",
             appId: "1:373143059252:web:5dc28e804781ff688d8361",
             measurementId: "G-FM47SXM2G0"
@@ -258,9 +258,8 @@
 
             const [selectedYear, selectedMonthIndex] = selectedMonth.split('-');
             const year = parseInt(selectedYear, 10);
-            const month = parseInt(selectedMonthIndex, 10) - 1;
-
-                  const rows = document.getElementById('submissionsBody').getElementsByTagName('tr');
+            const month = parseInt(selectedMonthIndex, 10
+            const rows = document.getElementById('submissionsBody').getElementsByTagName('tr');
             const monthlyRows = [];
 
             for (let row of rows) {
@@ -358,4 +357,3 @@
     </script>
 </body>
 </html>
-
