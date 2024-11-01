@@ -4,173 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - Gestión de Usuarios</title>
-    <!-- Firebase App (Firebase v9 Compatibility Mode) -->
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <style>
-        /* Styling for login form */
-        .login-form {
-            max-width: 300px;
-            margin: 100px auto;
-            padding: 20px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .login-form input {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            font-size: 1rem;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        .login-form button {
-            padding: 10px;
-            width: 100%;
-            font-size: 1rem;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .login-form button:hover {
-            background-color: #0056b3;
-        }
-
-        /* Initial hiding of admin panel */
-        #adminPanel {
-            display: none;
-        }
-
-        /* Admin Panel Styles */
-        .report-tab {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background-color: #28a745;
-            color: white;
-            padding: 10px;
-            text-decoration: none;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
-        }
-        .report-tab:hover {
-            background-color: #218838;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        h1, h2 {
-            text-align: center;
-            color: #333;
-            margin-top: 0;
-        }
-
-        .form-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: nowrap;
-            margin-bottom: 10px;
-        }
-
-        label {
-            font-size: 1rem;
-            color: #555;
-            white-space: nowrap;
-            margin-right: 10px;
-        }
-
-        input[type="text"], input[type="number"], select {
-            padding: 10px;
-            font-size: 1rem;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            flex: 1;
-            min-width: 100px;
-        }
-
-        button {
-            padding: 15px;
-            font-size: 1rem;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            width: 100%;
-            margin-top: 20px;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        .user-list {
-            margin-top: 30px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th, td {
-            border: 1px solid #ddd;
-            text-align: center;
-            padding: 8px;
-        }
-
-        th {
-            background-color: #007bff;
-            color: white;
-        }
-
-        /* Responsive styling */
-        @media (max-width: 600px) {
-            .form-row {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            label, input, select {
-                width: 100%;
-                margin-bottom: 10px;
-            }
-        }
+        /* Styling for the form and table */
+        /* (Insert your CSS styles here) */
     </style>
 </head>
 <body>
@@ -184,7 +20,6 @@
 
     <!-- Admin Panel Content -->
     <div id="adminPanel" class="container">
-        <a href="https://manny1994rd.github.io/points-tracker/report.html" class="report-tab">Reporte</a>
         <h1>Admin Panel - Gestión de Usuarios</h1>
 
         <!-- Formulario para Crear Nuevo Usuario -->
@@ -291,17 +126,81 @@
                 snapshot.forEach(userSnapshot => {
                     const user = userSnapshot.val();
                     const row = document.createElement('tr');
+                    row.setAttribute('data-user-id', userSnapshot.key);
                     row.innerHTML = `
                         <td>${user.name}</td>
                         <td>${user.location}</td>
                         <td>${user.gender}</td>
                         <td>${user.points}</td>
-                        <td><button onclick="editUser('${userSnapshot.key}', '${user.name}', '${user.location}', ${user.points})">Editar</button></td>
+                        <td><button onclick="editUser('${userSnapshot.key}')">Editar</button></td>
                         <td><button onclick="deleteUser('${userSnapshot.key}')">Eliminar</button></td>
                     `;
                     userListBody.appendChild(row);
                 });
             });
+        }
+
+        function editUser(userId) {
+            const row = document.querySelector(`tr[data-user-id="${userId}"]`);
+            const name = row.children[0].textContent;
+            const location = row.children[1].textContent;
+            const points = row.children[3].textContent;
+
+            row.innerHTML = `
+                <td><input type="text" id="editUserName_${userId}" value="${name}"></td>
+                <td>
+                    <select id="editUserLocation_${userId}">
+                        <option value="Santiago" ${location === 'Santiago' ? 'selected' : ''}>Santiago</option>
+                        <option value="La Vega" ${location === 'La Vega' ? 'selected' : ''}>La Vega</option>
+                        <option value="Moca" ${location === 'Moca' ? 'selected' : ''}>Moca</option>
+                        <option value="Puerto Plata" ${location === 'Puerto Plata' ? 'selected' : ''}>Puerto Plata</option>
+                        <option value="Jarabacoa" ${location === 'Jarabacoa' ? 'selected' : ''}>Jarabacoa</option>
+                    </select>
+                </td>
+                <td>${row.children[2].innerHTML}</td>
+                <td><input type="number" id="editUserPoints_${userId}" value="${points}"></td>
+                <td><button onclick="saveUserEdit('${userId}')">Guardar</button></td>
+                <td><button onclick="deleteUser('${userId}')">Eliminar</button></td>
+            `;
+        }
+
+        function saveUserEdit(userId) {
+            const newName = document.getElementById(`editUserName_${userId}`).value.trim();
+            const newLocation = document.getElementById(`editUserLocation_${userId}`).value;
+            const newPoints = parseInt(document.getElementById(`editUserPoints_${userId}`).value) || 0;
+
+            if (!newName) {
+                alert("El nombre no puede estar vacío.");
+                return;
+            }
+
+            const userRef = database.ref(`users/${userId}`);
+            userRef.update({
+                name: newName,
+                location: newLocation,
+                points: newPoints
+            }).then(() => {
+                alert("Datos del usuario actualizados.");
+                loadUsers();
+            }).catch(error => {
+                console.error("Error al actualizar los datos del usuario:", error);
+                alert("Error al actualizar los datos del usuario. Consulte la consola para más detalles.");
+            });
+        }
+
+        function deleteUser(userId) {
+            const confirmation = confirm('¿Está seguro de que desea eliminar este usuario?');
+            if (confirmation) {
+                database.ref(`users/${userId}`).remove()
+                .then(() => {
+                    alert('Usuario eliminado correctamente.');
+                    loadUsers();
+                })
+                .catch(error => {
+                    console.error('Error al eliminar el usuario:', error);
+                    alert('Error al eliminar el usuario. Consulte la consola para más detalles.');
+                });
+            }
         }
 
         window.onload = function() {
