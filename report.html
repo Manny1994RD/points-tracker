@@ -257,8 +257,8 @@
             if (!selectedMonth) return;
 
             const [selectedYear, selectedMonthIndex] = selectedMonth.split('-');
-            const year = parseInt(selectedYear, 10);
-            const month = parseInt(selectedMonthIndex, 10
+            const year = parseInt(selectedYear, 10
+            const month = parseInt(selectedMonthIndex, 10) - 1;
             const rows = document.getElementById('submissionsBody').getElementsByTagName('tr');
             const monthlyRows = [];
 
