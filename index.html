@@ -59,6 +59,15 @@
             flex: 1;
         }
 
+        input[type="date"] {
+            padding: 15px;
+            font-size: 1.2rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 50%;
+            flex: 1;
+        }
+
         button {
             padding: 15px;
             font-size: 1rem;
@@ -105,121 +114,160 @@
             font-weight: bold;
             color: #ff6347;
         }
+
+        .top-nav {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            background-color: #007bff;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .top-nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 1rem;
+        }
+
+        .top-nav a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
+    <div class="top-nav">
+        <a href="https://manny1994rd.github.io/points-tracker/admin.html">Admin Panel</a>
+    </div>
     <div class="container">
         <h1>Formulario de Envío de Puntos</h1>
 
         <!-- Formulario -->
         <form id="pointsForm">
             <!-- Personal Information -->
-            <div class="form-row">
-                <label for="genderSelect">Seleccionar Género</label>
-                <select id="genderSelect" onchange="filterUsersByGender()">
-                    <option value="">Seleccionar género</option>
-                    <option value="Hermano">Hermano</option>
-                    <option value="Hermana">Hermana</option>
-                </select>
-            </div>
-            <div class="form-row">
-                <label for="memberNameSelect">Seleccionar Miembro</label>
-                <select id="memberNameSelect">
-                    <option value="">Seleccionar miembro</option>
-                    <!-- Existing users will be populated here -->
-                </select>
-            </div>
-            <div class="form-row">
-                <label for="submissionDate">Fecha</label>
-                <input type="date" id="submissionDate" required>
-            </div>
+            <fieldset>
+                <legend>Información Personal</legend>
+                <div class="form-row">
+                    <label for="genderSelect">Seleccionar Género</label>
+                    <select id="genderSelect" onchange="filterUsersByGenderAndLocation()">
+                        <option value="">Seleccionar género</option>
+                        <option value="Hermano">Hermano</option>
+                        <option value="Hermana">Hermana</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label for="locationSelect">Seleccionar Ubicación</label>
+                    <select id="locationSelect" onchange="filterUsersByGenderAndLocation()">
+                        <option value="">Seleccionar ubicación</option>
+                        <!-- Locations will be dynamically populated here -->
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label for="memberNameSelect">Seleccionar Miembro</label>
+                    <select id="memberNameSelect">
+                        <option value="">Seleccionar miembro</option>
+                        <!-- Existing users will be populated here -->
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label for="submissionDate">Fecha</label>
+                    <input type="date" id="submissionDate" required>
+                </div>
+            </fieldset>
 
-                        <div class="form-row">
-                <label for="apacienta">APACIENTA (5)</label>
-                <input type="number" id="apacienta" value="0">
-            </div>
-            <div class="form-row">
-                <label for="firma">FIRMA (10)</label>
-                <input type="number" id="firma" value="0">
-            </div>
-            <div class="form-row">
-                <label for="videoSermon">VIDEO SERMON (10)</label>
-                <input type="number" id="videoSermon" value="0">
-            </div>
-            <div class="form-row">
-                <label for="libroPadre">LIBRO PADRE (10)</label>
-                <input type="number" id="libroPadre" value="0">
-            </div>
-            <div class="form-row">
-                <label for="libroPastor">LIBRO PASTOR (10)</label>
-                <input type="number" id="libroPastor" value="0">
-            </div>
-            <div class="form-row">
-                <label for="ag">AG (75)</label>
-                <input type="number" id="ag" value="0">
-            </div>
-            <div class="form-row">
-                <label for="edulms">EDULMS (200)</label>
-                <input type="number" id="edulms" value="0">
-            </div>
-            <div class="form-row">
-                <label for="simple">SIMPLE (1)</label>
-                <input type="number" id="simple" value="0">
-            </div>
-            <div class="form-row">
-                <label for="significativo">SIGNIFICATIVO (2)</label>
-                <input type="number" id="significativo" value="0">
-            </div>
-            <div class="form-row">
-                <label for="estudio">ESTUDIO (10)</label>
-                <input type="number" id="estudio" value="0">
-            </div>
-            <div class="form-row">
-                <label for="invitados">INVITADOS (50)</label>
-                <input type="number" id="invitados" value="0">
-            </div>
-            <div class="form-row">
-                <label for="bautismo">BAUTISMO (500)</label>
-                <input type="number" id="bautismo" value="0">
-            </div>
-            <div class="form-row">
-                <label for="culto">CULTO (1000)</label>
-                <input type="number" id="culto" value="0">
-            </div>
+            <!-- Point Inputs -->
+            <fieldset>
+                <legend>Ingresar Puntos</legend>
+                <div class="form-row">
+                    <label for="apacienta">APACIENTA (5)</label>
+                    <input type="number" id="apacienta" value="0">
+                </div>
+                <div class="form-row">
+                    <label for="firma">FIRMA (10)</label>
+                    <input type="number" id="firma" value="0">
+                </div>
+                <div class="form-row">
+                    <label for="videoSermon">VIDEO SERMON (10)</label>
+                    <input type="number" id="videoSermon" value="0">
+                </div>
+                <div class="form-row">
+                    <label for="libroPadre">LIBRO PADRE (10)</label>
+                    <input type="number" id="libroPadre" value="0">
+                </div>
+                <div class="form-row">
+                    <label for="libroPastor">LIBRO PASTOR (10)</label>
+                    <input type="number" id="libroPastor" value="0">
+                </div>
+                <div class="form-row">
+                    <label for="ag">AG (75)</label>
+                    <input type="number" id="ag" value="0">
+                </div>
+                <div class="form-row">
+                    <label for="edulms">EDULMS (200)</label>
+                    <input type="number" id="edulms" value="0">
+                </div>
+                <div class="form-row">
+                    <label for="simple">SIMPLE (1)</label>
+                    <input type="number" id="simple" value="0">
+                </div>
+                <div class="form-row">
+                    <label for="significativo">SIGNIFICATIVO (2)</label>
+                    <input type="number" id="significativo" value="0">
+                </div>
+                <div class="form-row">
+                    <label for="estudio">ESTUDIO (10)</label>
+                    <input type="number" id="estudio" value="0">
+                </div>
+                <div class="form-row">
+                    <label for="invitados">INVITADOS (50)</label>
+                    <input type="number" id="invitados" value="0">
+                </div>
+                <div class="form-row">
+                    <label for="bautismo">BAUTISMO (500)</label>
+                    <input type="number" id="bautismo" value="0">
+                </div>
+                <div class="form-row">
+                    <label for="culto">CULTO (1000)</label>
+                    <input type="number" id="culto" value="0">
+                </div>
+            </fieldset>
 
             <!-- Checkbox Input Fields -->
-            <div class="form-row">
-                <label for="miPaginaCheck">MI PÁGINA (25)</label>
-                <input type="checkbox" id="miPaginaCheck">
-            </div>
-            <div class="form-row">
-                <label for="prayDailyCheck">ORACIÓN DIARIA (25)</label>
-                <input type="checkbox" id="prayDailyCheck">
-            </div>
-            <div class="form-row">
-                <label for="offlineEduCheck">OFFLINE EDU (50)</label>
-                <input type="checkbox" id="offlineEduCheck">
-            </div>
-            <div class="form-row">
-                <label for="diaDePrepararCheck">DÍA DE PREPARAR (50)</label>
-                <input type="checkbox" id="diaDePrepararCheck">
-            </div>
-            <div class="form-row">
-                <label for="cartaMadreCheck">CARTA A MADRE (10)</label>
-                <input type="checkbox" id="cartaMadreCheck">
-            </div>
-            <div class="form-row">
-                <label for="hongoCheck">HONGO (500)</label>
-                <input type="checkbox" id="hongoCheck">
-            </div>
-            <div class="form-row">
-                <label for="guienoCheck">GUIENO (-500)</label>
-                <input type="checkbox" id="guienoCheck">
-            </div>
-            <div class="form-row">
-                <label for="tortugaRojaCheck">TORTUGA ROJA (-100)</label>
-                <input type="checkbox" id="tortugaRojaCheck">
-            </div>
+            <fieldset>
+                <legend>Entradas de Checkbox</legend>
+                <div class="form-row">
+                    <label for="miPaginaCheck">MI PÁGINA (25)</label>
+                    <input type="checkbox" id="miPaginaCheck">
+                </div>
+                <div class="form-row">
+                    <label for="prayDailyCheck">ORACIÓN DIARIA (25)</label>
+                    <input type="checkbox" id="prayDailyCheck">
+                </div>
+                <div class="form-row">
+                    <label for="offlineEduCheck">OFFLINE EDU (50)</label>
+                    <input type="checkbox" id="offlineEduCheck">
+                </div>
+                <div class="form-row">
+                    <label for="diaDePrepararCheck">DÍA DE PREPARAR (50)</label>
+                    <input type="checkbox" id="diaDePrepararCheck">
+                </div>
+                <div class="form-row">
+                    <label for="cartaMadreCheck">CARTA A MADRE (10)</label>
+                    <input type="checkbox" id="cartaMadreCheck">
+                </div>
+                <div class="form-row">
+                    <label for="hongoCheck">HONGO (500)</label>
+                    <input type="checkbox" id="hongoCheck">
+                </div>
+                <div class="form-row">
+                    <label for="guienoCheck">GUIENO (-500)</label>
+                    <input type="checkbox" id="guienoCheck">
+                </div>
+                <div class="form-row">
+                    <label for="tortugaRojaCheck">TORTUGA ROJA (-100)</label>
+                    <input type="checkbox" id="tortugaRojaCheck">
+                </div>
+            </fieldset>
 
             <!-- Button to calculate total points -->
             <button type="button" onclick="confirmSubmission()">Calcular Puntos Totales y Guardar</button>
@@ -265,7 +313,7 @@
     </div>
 
     <script>
-        // Your web app's Firebase configuration
+        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDRddA_EeZvCMZS5qQAi4pkYtOR_Xblib8",
             authDomain: "mario-racer.firebaseapp.com",
@@ -273,43 +321,65 @@
             projectId: "mario-racer",
             storageBucket: "mario-racer.appspot.com",
             messagingSenderId: "373143059252",
-            appId: "1:373143059252:web:5dc28e804781ff688d8361",
-            measurementId: "G-FM47SXM2G0"
+            appId: "1:373143059252:web:5dc28e804781ff688d8361"
         };
 
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // Load existing users into the dropdown based on selected gender
         function loadExistingUsers() {
             const memberNameSelect = document.getElementById('memberNameSelect');
-            memberNameSelect.innerHTML = '<option value="">Seleccionar miembro</option>'; // Reset options
+            const locationSelect = document.getElementById('locationSelect');
+            memberNameSelect.innerHTML = '<option value="">Seleccionar miembro</option>';
+            locationSelect.innerHTML = '<option value="">Seleccionar ubicación</option>';
+
+            const locations = new Set();
 
             database.ref('users').once('value', (snapshot) => {
                 if (snapshot.exists()) {
                     snapshot.forEach(userSnapshot => {
                         const user = userSnapshot.val();
+                        
+                        // Add user to member selection dropdown
                         const option = document.createElement('option');
                         option.value = userSnapshot.key;
                         option.textContent = `${user.name} - ${user.location}`;
                         option.dataset.gender = user.gender;
+                        option.dataset.location = user.location;
                         memberNameSelect.appendChild(option);
+                        
+                        // Add unique locations to location dropdown
+                        locations.add(user.location);
                     });
+
+                    // Populate location select options
+                    locations.forEach(location => {
+                        const locationOption = document.createElement('option');
+                        locationOption.value = location;
+                        locationOption.textContent = location;
+                        locationSelect.appendChild(locationOption);
+                    });
+                } else {
+                    console.warn("No users found in the database.");
                 }
+            }).catch(error => {
+                console.error("Error al cargar usuarios:", error);
             });
         }
 
-        // Filter users based on selected gender
-        function filterUsersByGender() {
+        function filterUsersByGenderAndLocation() {
             const gender = document.getElementById('genderSelect').value;
+            const location = document.getElementById('locationSelect').value;
             const memberNameSelect = document.getElementById('memberNameSelect');
 
             for (let i = 0; i < memberNameSelect.options.length; i++) {
                 const option = memberNameSelect.options[i];
                 if (option.value === "") continue;
 
-                if (option.dataset.gender === gender || gender === "") {
+                const matchesGender = gender === "" || option.dataset.gender === gender;
+                const matchesLocation = location === "" || option.dataset.location === location;
+
+                if (matchesGender && matchesLocation) {
                     option.style.display = "block";
                 } else {
                     option.style.display = "none";
@@ -317,99 +387,6 @@
             }
         }
 
-        // Function to calculate total points
-        function calculateTotal() {
-            let total = 0;
-
-            // Parse inputs as integers and handle empty or invalid input as 0
-            const simple = parseInt(document.getElementById('simple').value) || 0;
-            const significativo = parseInt(document.getElementById('significativo').value) || 0;
-            const estudio = parseInt(document.getElementById('estudio').value) || 0;
-            const invitados = parseInt(document.getElementById('invitados').value) || 0;
-            const bautismo = parseInt(document.getElementById('bautismo').value) || 0;
-            const culto = parseInt(document.getElementById('culto').value) || 0;
-
-            $1
-            const apacienta = parseInt(document.getElementById('apacienta').value) || 0;
-            const firma = parseInt(document.getElementById('firma').value) || 0;
-            const videoSermon = parseInt(document.getElementById('videoSermon').value) || 0;
-            const libroPadre = parseInt(document.getElementById('libroPadre').value) || 0;
-            const libroPastor = parseInt(document.getElementById('libroPastor').value) || 0;
-            const ag = parseInt(document.getElementById('ag').value) || 0;
-            const edulms = parseInt(document.getElementById('edulms').value) || 0;
-
-            total += apacienta * 5;
-            total += firma * 10;
-            total += videoSermon * 10;
-            total += libroPadre * 10;
-            total += libroPastor * 10;
-            total += ag * 75;
-            total += edulms * 200;
-
-            // Add or subtract points based on checkbox selections
-            if (document.getElementById('miPaginaCheck').checked) total += 25;
-            if (document.getElementById('prayDailyCheck').checked) total += 25;
-            if (document.getElementById('offlineEduCheck').checked) total += 50;
-            if (document.getElementById('diaDePrepararCheck').checked) total += 50;
-            if (document.getElementById('cartaMadreCheck').checked) total += 10;
-            if (document.getElementById('hongoCheck').checked) total += 500;
-            if (document.getElementById('guienoCheck').checked) total -= 500;
-            if (document.getElementById('tortugaRojaCheck').checked) total -= 100;
-
-            // Display total points
-            document.getElementById('totalPoints').innerText = total;
-
-            return total;
-        }
-
-        // Function to confirm and save user data
-        function confirmSubmission() {
-            const totalPoints = calculateTotal();
-            const userId = document.getElementById('memberNameSelect').value;
-            const date = document.getElementById('submissionDate').value;
-
-            if (!userId || !date) {
-                alert("Por favor, complete todos los campos requeridos.");
-                return;
-            }
-
-            const confirmation = confirm(`Está a punto de enviar los siguientes puntos totales: ${totalPoints}.
-¿Está seguro de que toda la información es correcta?`);
-            if (confirmation) {
-                saveUserData(totalPoints);
-            }
-        }
-
-        // Function to save user data and update leaderboard in Firebase
-        function saveUserData(totalPoints) {
-            const userId = document.getElementById('memberNameSelect').value;
-            const date = document.getElementById('submissionDate').value;
-
-            // Update points for existing user
-            const userRef = database.ref(`users/${userId}`);
-
-            userRef.once('value').then(snapshot => {
-                if (snapshot.exists()) {
-                    const currentPoints = snapshot.val().points || 0;
-                    userRef.update({
-                        points: currentPoints + totalPoints
-                    }).then(() => {
-                        alert("Puntos añadidos correctamente.");
-                        loadLeaderboard(); // Refresh leaderboard
-                    }).catch(error => {
-                        console.error("Error al actualizar los puntos:", error);
-                        alert("Error al actualizar los puntos. Consulte la consola para más detalles.");
-                    });
-                } else {
-                    alert("Usuario no encontrado.");
-                }
-            }).catch(error => {
-                console.error("Error al obtener el usuario:", error);
-                alert("Error al obtener el usuario. Consulte la consola para más detalles.");
-            });
-        }
-
-        // Function to load the leaderboard from Firebase
         function loadLeaderboard() {
             const usersRef = database.ref('users');
 
@@ -436,14 +413,12 @@
                     }
                 });
 
-                // Sort users by points in descending order and get the top 10
                 maleUsers.sort((a, b) => b.points - a.points);
-                const topMaleUsers = maleUsers;
-                
-                femaleUsers.sort((a, b) => b.points - a.points);
-                const topFemaleUsers = femaleUsers;
+                const topMaleUsers = maleUsers.slice(0, 10);
 
-                // Populate male leaderboard
+                femaleUsers.sort((a, b) => b.points - a.points);
+                const topFemaleUsers = femaleUsers.slice(0, 10);
+
                 topMaleUsers.forEach((user, index) => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
@@ -455,7 +430,6 @@
                     leaderboardBodyMale.appendChild(row);
                 });
 
-                // Populate female leaderboard
                 topFemaleUsers.forEach((user, index) => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
@@ -472,7 +446,92 @@
             });
         }
 
-        // Load existing users and leaderboard on page load
+        function confirmSubmission() {
+            const totalPoints = calculateTotal();
+            const userId = document.getElementById('memberNameSelect').value;
+            const date = document.getElementById('submissionDate').value;
+
+            if (!userId || !date) {
+                alert("Por favor, complete todos los campos requeridos.");
+                return;
+            }
+
+            const confirmation = confirm(`Está a punto de enviar los siguientes puntos totales: ${totalPoints}.\n¿Está seguro de que toda la información es correcta?`);
+            if (confirmation) {
+                saveUserData(userId, totalPoints, date);
+            }
+        }
+
+        function calculateTotal() {
+            let total = 0;
+
+            const pointsConfig = [
+                { id: 'apacienta', multiplier: 5 },
+                { id: 'firma', multiplier: 10 },
+                { id: 'videoSermon', multiplier: 10 },
+                { id: 'libroPadre', multiplier: 10 },
+                { id: 'libroPastor', multiplier: 10 },
+                { id: 'ag', multiplier: 75 },
+                { id: 'edulms', multiplier: 200 },
+                { id: 'simple', multiplier: 1 },
+                { id: 'significativo', multiplier: 2 },
+                { id: 'estudio', multiplier: 10 },
+                { id: 'invitados', multiplier: 50 },
+                { id: 'bautismo', multiplier: 500 },
+                { id: 'culto', multiplier: 1000 }
+            ];
+
+            pointsConfig.forEach(config => {
+                const value = parseInt(document.getElementById(config.id).value) || 0;
+                total += value * config.multiplier;
+            });
+
+            const checkboxConfig = [
+                { id: 'miPaginaCheck', points: 25 },
+                { id: 'prayDailyCheck', points: 25 },
+                { id: 'offlineEduCheck', points: 50 },
+                { id: 'diaDePrepararCheck', points: 50 },
+                { id: 'cartaMadreCheck', points: 10 },
+                { id: 'hongoCheck', points: 500 },
+                { id: 'guienoCheck', points: -500 },
+                { id: 'tortugaRojaCheck', points: -100 }
+            ];
+
+            checkboxConfig.forEach(config => {
+                if (document.getElementById(config.id).checked) {
+                    total += config.points;
+                }
+            });
+
+            document.getElementById('totalPoints').innerText = total;
+            return total;
+        }
+
+        function saveUserData(userId, totalPoints, date) {
+            const userRef = database.ref(`users/${userId}`);
+
+            userRef.once('value').then(snapshot => {
+                if (snapshot.exists()) {
+                    const currentPoints = snapshot.val().points || 0;
+                    userRef.update({
+                        points: currentPoints + totalPoints,
+                        lastSubmissionDate: date
+                    }).then(() => {
+                        alert("Puntos añadidos correctamente.");
+                        loadLeaderboard();
+                    }).catch(error => {
+                        console.error("Error al actualizar los puntos:", error);
+                        alert("Error al actualizar los puntos. Consulte la consola para más detalles.");
+                    });
+                } else {
+                    alert("Usuario no encontrado.");
+                }
+            }).catch(error => {
+                console.error("Error al obtener el usuario:", error);
+                alert("Error al obtener el usuario. Consulte la consola para más detalles.");
+            });
+        }
+
         window.onload = function() {
             loadExistingUsers();
             loadLeaderboard();
