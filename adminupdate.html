@@ -8,7 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <style>
-        /* Adding styles for login form */
+        /* Styling for login form */
         .login-form {
             max-width: 300px;
             margin: 100px auto;
@@ -236,6 +236,18 @@
     </div>
 
     <script>
+        // Firebase configuration and initialization
+        const firebaseConfig = {
+            apiKey: "YOUR_FIREBASE_API_KEY",
+            authDomain: "YOUR_FIREBASE_AUTH_DOMAIN",
+            databaseURL: "YOUR_FIREBASE_DATABASE_URL",
+            projectId: "YOUR_FIREBASE_PROJECT_ID",
+            storageBucket: "YOUR_FIREBASE_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_FIREBASE_MESSAGING_SENDER_ID",
+            appId: "YOUR_FIREBASE_APP_ID"
+        };
+        firebase.initializeApp(firebaseConfig);
+
         function login() {
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value.trim();
@@ -243,6 +255,7 @@
             if (username === 'admin' && password === '1234') {
                 document.getElementById('loginForm').style.display = 'none';
                 document.getElementById('adminPanel').style.display = 'block';
+                loadUsers(); // Load users after login
             } else {
                 alert('Incorrect username or password');
             }
@@ -260,7 +273,11 @@
 
             const newUserRef = firebase.database().ref('users').push();
             newUserRef.set({ name: userName, location: userLocation, gender: userGender, points: 0 })
-                .then(() => { alert("Nuevo usuario creado correctamente."); loadUsers(); })
+                .then(() => {
+                    alert("Nuevo usuario creado correctamente.");
+                    document.getElementById('newUserForm').reset();
+                    loadUsers();
+                })
                 .catch(error => alert("Error al crear el usuario."));
         }
 
@@ -296,7 +313,12 @@
             `;
         }
 
-        window.onload = loadUsers;
+        window.onload = function() {
+            // Only load users if already logged in (for page refresh)
+            if (document.getElementById('adminPanel').style.display === 'block') {
+                loadUsers();
+            }
+        };
     </script>
 </body>
 </html>
