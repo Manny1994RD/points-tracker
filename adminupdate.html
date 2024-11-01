@@ -8,7 +8,131 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <style>
-        /* Your original CSS styles */
+        /* Root colors based on the provided palette */
+        :root {
+            --light-purple: #b8b8d1;
+            --purple: #5b5f97;
+            --yellow: #ffc145;
+            --white: #fffffb;
+            --red: #ff6b6c;
+        }
+
+        /* General styling for minimalist look */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--light-purple);
+            color: var(--purple);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        h1, h2 {
+            color: var(--purple);
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .container {
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            max-width: 700px;
+            width: 100%;
+            margin: 20px;
+        }
+
+        .login-form, .container form, .user-list {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .login-form input, .container input[type="text"], .container input[type="number"], .container select {
+            width: 100%;
+            max-width: 300px;
+            padding: 10px;
+            border: 1px solid var(--purple);
+            border-radius: 5px;
+            background-color: var(--white);
+            color: var(--purple);
+            font-size: 1rem;
+        }
+
+        .login-form button, .container button {
+            background-color: var(--purple);
+            color: var(--white);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 1rem;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .login-form button:hover, .container button:hover {
+            background-color: var(--yellow);
+        }
+
+        .report-tab {
+            background-color: var(--purple);
+            color: var(--white);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        .report-tab:hover {
+            background-color: var(--yellow);
+            color: var(--purple);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid var(--light-purple);
+        }
+
+        th {
+            background-color: var(--purple);
+            color: var(--white);
+        }
+
+        td {
+            background-color: var(--white);
+        }
+
+        .user-list button {
+            background-color: var(--purple);
+            color: var(--white);
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .user-list button:hover {
+            background-color: var(--yellow);
+            color: var(--purple);
+        }
     </style>
 </head>
 <body>
