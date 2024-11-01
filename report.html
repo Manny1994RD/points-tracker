@@ -101,12 +101,19 @@
                 </select>
             </div>
 
-            <div class="action-buttons">
-                <label for="weekPicker">Select Week:</label>
-                <input type="date" id="weekPicker" onchange="applyWeeklyFilter()">
-                
+            <div>
+                <label for="startDatePicker">Start Date:</label>
+                <input type="date" id="startDatePicker">
+
+                <label for="endDatePicker">End Date:</label>
+                <input type="date" id="endDatePicker">
+                <button onclick="applyWeeklyFilter()">Generate Weekly Report</button>
+            </div>
+
+            <div>
                 <label for="monthPicker">Select Month:</label>
-                <input type="month" id="monthPicker" onchange="applyMonthlyFilter()">
+                <input type="month" id="monthPicker">
+                <button onclick="applyMonthlyFilter()">Generate Monthly Report</button>
             </div>
         </div>
 
@@ -139,14 +146,13 @@
     <script>
         // Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyDRddA_EeZvCMZS5qQAi4pkYtOR_Xblib8",
-            authDomain: "mario-racer.firebaseapp.com",
-            databaseURL: "https://mario-racer-default-rtdb.firebaseio.com",
-            projectId: "mario-racer",
-            storageBucket: "mario-racer.appspot.com",
-            messagingSenderId: "373143059252",
-            appId: "1:373143059252:web:5dc28e804781ff688d8361",
-            measurementId: "G-FM47SXM2G0"
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            databaseURL: "YOUR_DATABASE_URL",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
         };
 
         firebase.initializeApp(firebaseConfig);
@@ -187,15 +193,142 @@
             });
         }
 
-        // Filtering and Ranking Functions
-        function applyFilters() { /* Location and gender filter logic */ }
-        function applyWeeklyFilter() { /* Weekly filtering and ranking logic */ }
-        function applyMonthlyFilter() { /* Monthly filtering and ranking logic */ }
-        
-        // Export Functions
-        function exportWeeklyRankToExcel() { /* Export weekly ranked data */ }
-        function exportMonthlyRankToExcel() { /* Export monthly ranked data */ }
+        function applyFilters() {
+            const locationFilter = document.getElementById('locationFilter').value;
+            const genderFilter = document.getElementById('genderFilter').value;
+            const rows = document.getElementById('submissionsBody').getElementsByTagName('tr');
 
+            for (let row of rows) {
+                const location = row.cells[2].innerText;
+                const gender = row.cells[3].innerText;
+                let showRow = true;
+
+                if (locationFilter && location !== locationFilter) {
+                    showRow = false;
+                }
+                if (genderFilter && gender !== genderFilter) {
+                    showRow = false;
+                }
+                row.style.display = showRow ? '' : 'none';
+            }
+        }
+
+        function applyWeeklyFilter() {
+            const startDate = new Date(document.getElementById('startDatePicker').value);
+            const endDate = new Date(document.getElementById('endDatePicker').value);
+
+            if (isNaN(startDate) || isNaN(endDate)) {
+                alert("Please select both a start and end date.");
+                return;
+            }
+
+            endDate.setHours(23, 59, 59, 999);
+            const rows = document.getElementById('submissionsBody').getElementsByTagName('tr');
+            const weeklyRows = [];
+
+            for (let row of rows) {
+                const dateCell = row.cells[5].innerText;
+                const submissionDate = new Date(dateCell);
+
+                if (submissionDate >= startDate && submissionDate <= endDate) {
+                    row.style.display = '';
+                    weeklyRows.push(row);
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+
+            weeklyRows.sort((a, b) => b.cells[4].innerText - a.cells[4].innerText);
+            weeklyRows.forEach((row, index) => {
+                row.cells[0].innerText = index + 1;
+            });
+        }
+
+        function applyMonthlyFilter() {
+            const selectedMonth = document.getElementById('monthPicker').value;
+            if (!selectedMonth) return;
+
+            const [selectedYear, selectedMonthIndex] = selectedMonth.split('-');
+            const year = parseInt(selectedYear, 10);
+            const month = parseInt(selectedMonthIndex, 10) - 1;
+
+            const rows = document.getElementById('submissionsBody').getElementsByTagName('tr');
+            const monthlyRows = [];
+
+            for (let row of rows) {
+                const dateCell = row.cells[5].innerText;
+                const submissionDate = new Date(dateCell);
+
+                if (submissionDate.getFullYear() === year && submissionDate.getMonth() === month) {
+                    row.style.display = '';
+                    monthlyRows.push(row);
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+
+            monthlyRows.sort((a, b) => b.cells[4].innerText - a.cells[4].innerText);
+            monthlyRows.forEach((row, index) => {
+                row.cells[0].innerText = index +
+                row.cells[0].innerText = index + 1; // Update rank in the first cell
+            });
+        }
+
+        function exportWeeklyRankToExcel() {
+            const submissions = [];
+            const headers = ['Rank', 'Nombre', 'Ubicación', 'Género', 'Puntos', 'Fecha'];
+            submissions.push(headers);
+
+            // Export only visible (filtered) rows, which are ranked
+            const visibleRows = Array.from(document.querySelectorAll('#submissionsBody tr'))
+                .filter(row => row.style.display !== 'none');
+
+            visibleRows.forEach((row, index) => {
+                const cells = row.querySelectorAll('td');
+                submissions.push([
+                    index + 1, // Rank
+                    cells[1].innerText, // Nombre
+                    cells[2].innerText, // Ubicación
+                    cells[3].innerText, // Género
+                    cells[4].innerText, // Puntos
+                    cells[5].innerText  // Fecha
+                ]);
+            });
+
+            const ws = XLSX.utils.aoa_to_sheet(submissions);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Weekly Rank");
+            XLSX.writeFile(wb, "Weekly_Rank.xlsx");
+        }
+
+        function exportMonthlyRankToExcel() {
+            const submissions = [];
+            const headers = ['Rank', 'Nombre', 'Ubicación', 'Género', 'Puntos', 'Fecha'];
+            submissions.push(headers);
+
+            // Export only visible (filtered) rows, which are ranked
+            const visibleRows = Array.from(document.querySelectorAll('#submissionsBody tr'))
+                .filter(row => row.style.display !== 'none');
+
+            visibleRows.forEach((row, index) => {
+                const cells = row.querySelectorAll('td');
+                submissions.push([
+                    index + 1, // Rank
+                    cells[1].innerText, // Nombre
+                    cells[2].innerText, // Ubicación
+                    cells[3].innerText, // Género
+                    cells[4].innerText, // Puntos
+                    cells[5].innerText  // Fecha
+                ]);
+            });
+
+            const ws = XLSX.utils.aoa_to_sheet(submissions);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Monthly Rank");
+            XLSX.writeFile(wb, "Monthly_Rank.xlsx");
+        }
+
+        // Load submissions on page load
         window.onload = loadSubmissions;
     </script>
 </body>
