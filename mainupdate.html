@@ -149,10 +149,17 @@
                 <legend>Información Personal</legend>
                 <div class="form-row">
                     <label for="genderSelect">Seleccionar Género</label>
-                    <select id="genderSelect" onchange="filterUsersByGender()">
+                    <select id="genderSelect" onchange="filterUsersByGenderAndLocation()">
                         <option value="">Seleccionar género</option>
                         <option value="Hermano">Hermano</option>
                         <option value="Hermana">Hermana</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label for="locationSelect">Seleccionar Ubicación</label>
+                    <select id="locationSelect" onchange="filterUsersByGenderAndLocation()">
+                        <option value="">Seleccionar ubicación</option>
+                        <!-- Locations will be dynamically populated here -->
                     </select>
                 </div>
                 <div class="form-row">
@@ -320,35 +327,37 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        function filterUsersByGender() {
-            const gender = document.getElementById('genderSelect').value;
-            const memberNameSelect = document.getElementById('memberNameSelect');
-
-            for (let i = 0; i < memberNameSelect.options.length; i++) {
-                const option = memberNameSelect.options[i];
-                if (option.value === "") continue;
-
-                if (option.dataset.gender === gender || gender === "") {
-                    option.style.display = "block";
-                } else {
-                    option.style.display = "none";
-                }
-            }
-        }
-
         function loadExistingUsers() {
             const memberNameSelect = document.getElementById('memberNameSelect');
+            const locationSelect = document.getElementById('locationSelect');
             memberNameSelect.innerHTML = '<option value="">Seleccionar miembro</option>';
+            locationSelect.innerHTML = '<option value="">Seleccionar ubicación</option>';
+
+            const locations = new Set();
 
             database.ref('users').once('value', (snapshot) => {
                 if (snapshot.exists()) {
                     snapshot.forEach(userSnapshot => {
                         const user = userSnapshot.val();
+                        
+                        // Add user to member selection dropdown
                         const option = document.createElement('option');
                         option.value = userSnapshot.key;
                         option.textContent = `${user.name} - ${user.location}`;
                         option.dataset.gender = user.gender;
+                        option.dataset.location = user.location;
                         memberNameSelect.appendChild(option);
+                        
+                        // Add unique locations to location dropdown
+                        locations.add(user.location);
+                    });
+
+                    // Populate location select options
+                    locations.forEach(location => {
+                        const locationOption = document.createElement('option');
+                        locationOption.value = location;
+                        locationOption.textContent = location;
+                        locationSelect.appendChild(locationOption);
                     });
                 } else {
                     console.warn("No users found in the database.");
@@ -358,149 +367,24 @@
             });
         }
 
-        function calculateTotal() {
-            let total = 0;
+        function filterUsersByGenderAndLocation() {
+            const gender = document.getElementById('genderSelect').value;
+            const location = document.getElementById('locationSelect').value;
+            const memberNameSelect = document.getElementById('memberNameSelect');
 
-            const pointsConfig = [
-                { id: 'apacienta', multiplier: 5 },
-                { id: 'firma', multiplier: 10 },
-                { id: 'videoSermon', multiplier: 10 },
-                { id: 'libroPadre', multiplier: 10 },
-                { id: 'libroPastor', multiplier: 10 },
-                { id: 'ag', multiplier: 75 },
-                { id: 'edulms', multiplier: 200 },
-                { id: 'simple', multiplier: 1 },
-                { id: 'significativo', multiplier: 2 },
-                { id: 'estudio', multiplier: 10 },
-                { id: 'invitados', multiplier: 50 },
-                { id: 'bautismo', multiplier: 500 },
-                { id: 'culto', multiplier: 1000 }
-            ];
+            for (let i = 0; i < memberNameSelect.options.length; i++) {
+                const option = memberNameSelect.options[i];
+                if (option.value === "") continue;
 
-            pointsConfig.forEach(config => {
-                const value = parseInt(document.getElementById(config.id).value) || 0;
-                total += value * config.multiplier;
-            });
+                const matchesGender = gender === "" || option.dataset.gender === gender;
+                const matchesLocation = location === "" || option.dataset.location === location;
 
-            const checkboxConfig = [
-                { id: 'miPaginaCheck', points: 25 },
-                { id: 'prayDailyCheck', points: 25 },
-                { id: 'offlineEduCheck', points: 50 },
-                { id: 'diaDePrepararCheck', points: 50 },
-                { id: 'cartaMadreCheck', points: 10 },
-                { id: 'hongoCheck', points: 500 },
-                { id: 'guienoCheck', points: -500 },
-                { id: 'tortugaRojaCheck', points: -100 }
-            ];
-
-            checkboxConfig.forEach(config => {
-                if (document.getElementById(config.id).checked) {
-                    total += config.points;
-                }
-            });
-
-            document.getElementById('totalPoints').innerText = total;
-            return total;
-        }
-
-        function confirmSubmission() {
-            const totalPoints = calculateTotal();
-            const userId = document.getElementById('memberNameSelect').value;
-            const date = document.getElementById('submissionDate').value;
-
-            if (!userId || !date) {
-                alert("Por favor, complete todos los campos requeridos.");
-                return;
-            }
-
-            const confirmation = confirm(`Está a punto de enviar los siguientes puntos totales: ${totalPoints}.\n¿Está seguro de que toda la información es correcta?`);
-            if (confirmation) {
-                saveUserData(userId, totalPoints, date);
-            }
-        }
-
-        function saveUserData(userId, totalPoints, date) {
-            const userRef = database.ref(`users/${userId}`);
-
-            userRef.once('value').then(snapshot => {
-                if (snapshot.exists()) {
-                    const currentPoints = snapshot.val().points || 0;
-                    userRef.update({
-                        points: currentPoints + totalPoints,
-                        lastSubmissionDate: date
-                    }).then(() => {
-                        alert("Puntos añadidos correctamente.");
-                        loadLeaderboard();
-                    }).catch(error => {
-                        console.error("Error al actualizar los puntos:", error);
-                        alert("Error al actualizar los puntos. Consulte la consola para más detalles.");
-                    });
+                if (matchesGender && matchesLocation) {
+                    option.style.display = "block";
                 } else {
-                    alert("Usuario no encontrado.");
+                    option.style.display = "none";
                 }
-            }).catch(error => {
-                console.error("Error al obtener el usuario:", error);
-                alert("Error al obtener el usuario. Consulte la consola para más detalles.");
-            });
-        }
-
-        function loadLeaderboard() {
-            const usersRef = database.ref('users');
-
-            usersRef.once('value', (snapshot) => {
-                const leaderboardBodyMale = document.getElementById('leaderboardBodyMale');
-                const leaderboardBodyFemale = document.getElementById('leaderboardBodyFemale');
-                leaderboardBodyMale.innerHTML = '';
-                leaderboardBodyFemale.innerHTML = '';
-
-                if (!snapshot.exists()) {
-                    console.warn("No user data found.");
-                    return;
-                }
-
-                const maleUsers = [];
-                const femaleUsers = [];
-
-                snapshot.forEach(userSnapshot => {
-                    const user = userSnapshot.val();
-                    if (user.gender === 'Hermano') {
-                        maleUsers.push(user);
-                    } else if (user.gender === 'Hermana') {
-                        femaleUsers.push(user);
-                    }
-                });
-
-                maleUsers.sort((a, b) => b.points - a.points);
-                const topMaleUsers = maleUsers.slice(0, 10);
-
-                femaleUsers.sort((a, b) => b.points - a.points);
-                const topFemaleUsers = femaleUsers.slice(0, 10);
-
-                topMaleUsers.forEach((user, index) => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${index + 1}</td>
-                        <td class="top-scores">${user.points}</td>
-                        <td>${user.name}</td>
-                        <td>${user.location}</td>
-                    `;
-                    leaderboardBodyMale.appendChild(row);
-                });
-
-                topFemaleUsers.forEach((user, index) => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${index + 1}</td>
-                        <td class="top-scores">${user.points}</td>
-                        <td>${user.name}</td>
-                        <td>${user.location}</td>
-                    `;
-                    leaderboardBodyFemale.appendChild(row);
-                });
-            }).catch(error => {
-                console.error("Error loading leaderboard:", error);
-                alert("Error al cargar la tabla de clasificación. Consulte la consola para más detalles.");
-            });
+            }
         }
 
         window.onload = function() {
