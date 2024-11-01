@@ -134,7 +134,7 @@
                     <th>Puntos</th>
                     <th>Fecha</th>
                     <th>Eliminar</th>
-                    <th>Seleccionar</th>
+                    <th>Update</th>
                 </tr>
             </thead>
             <tbody id="submissionsBody">
@@ -146,13 +146,14 @@
     <script>
         // Firebase configuration
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            databaseURL: "YOUR_DATABASE_URL",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
+            apiKey: "AIzaSyDRddA_EeZvCMZS5qQAi4pkYtOR_Xblib8",
+            authDomain: "mario-racer.firebaseapp.com",
+            databaseURL: "https://mario-racer-default-rtdb.firebaseio.com",
+            projectId: "mario-racer",
+            storageBucket: "mario-racer.appspot.com",
+            messagingSenderId: "373143059252",
+            appId: "1:373143059252:web:5dc28e804781ff688d8361",
+            measurementId: "G-FM47SXM2G0"
         };
 
         firebase.initializeApp(firebaseConfig);
@@ -160,7 +161,7 @@
 
         function loadSubmissions() {
             const submissionsBody = document.getElementById('submissionsBody');
-            submissionsBody.innerHTML = '';
+            submissionsBody.innerHTML = ''; // Clear any existing content
             const locations = new Set();
 
             database.ref('users').once('value', (snapshot) => {
@@ -168,28 +169,35 @@
                     snapshot.forEach(userSnapshot => {
                         const user = userSnapshot.val();
                         locations.add(user.location);
+
                         const row = document.createElement('tr');
                         row.setAttribute('data-id', userSnapshot.key);
                         row.innerHTML = `
                             <td></td>
-                            <td>${user.name}</td>
-                            <td>${user.location}</td>
-                            <td>${user.gender}</td>
-                            <td>${user.points}</td>
+                            <td>${user.name || 'N/A'}</td>
+                            <td>${user.location || 'N/A'}</td>
+                            <td>${user.gender || 'N/A'}</td>
+                            <td><input type="number" value="${user.points || '0'}" class="pointsInput" data-id="${userSnapshot.key}"></td>
                             <td>${user.date || '-'}</td>
                             <td><button onclick="deleteSubmission('${userSnapshot.key}')">Eliminar</button></td>
-                            <td><input type="checkbox" class="selectCheckbox"></td>
+                            <td><button onclick="updateSubmission('${userSnapshot.key}')">Update</button></td>
                         `;
                         submissionsBody.appendChild(row);
                     });
+
+                    // Populate location filter options
+                    const locationFilter = document.getElementById('locationFilter');
+                    locations.forEach(location => {
+                        const option = document.createElement('option');
+                        option.value = location;
+                        option.textContent = location;
+                        locationFilter.appendChild(option);
+                    });
+                } else {
+                    console.log("No user data available.");
                 }
-                const locationFilter = document.getElementById('locationFilter');
-                locations.forEach(location => {
-                    const option = document.createElement('option');
-                    option.value = location;
-                    option.textContent = location;
-                    locationFilter.appendChild(option);
-                });
+            }).catch((error) => {
+                console.error("Error loading submissions: ", error);
             });
         }
 
@@ -252,7 +260,7 @@
             const year = parseInt(selectedYear, 10);
             const month = parseInt(selectedMonthIndex, 10) - 1;
 
-            const rows = document.getElementById('submissionsBody').getElementsByTagName('tr');
+                  const rows = document.getElementById('submissionsBody').getElementsByTagName('tr');
             const monthlyRows = [];
 
             for (let row of rows) {
@@ -269,8 +277,28 @@
 
             monthlyRows.sort((a, b) => b.cells[4].innerText - a.cells[4].innerText);
             monthlyRows.forEach((row, index) => {
-                row.cells[0].innerText = index +
-                row.cells[0].innerText = index + 1; // Update rank in the first cell
+                row.cells[0].innerText = index + 1;
+            });
+        }
+
+        function updateSubmission(userId) {
+            const pointsInput = document.querySelector(`input.pointsInput[data-id="${userId}"]`);
+            const updatedPoints = pointsInput.value;
+
+            if (isNaN(updatedPoints)) {
+                alert("Please enter a valid number for points.");
+                return;
+            }
+
+            const userRef = database.ref(`users/${userId}`);
+            userRef.update({
+                points: parseInt(updatedPoints)
+            }).then(() => {
+                alert("Points updated successfully.");
+                loadSubmissions(); // Reload submissions to reflect changes
+            }).catch(error => {
+                console.error("Error updating points:", error);
+                alert("Error updating points. Check console for details.");
             });
         }
 
@@ -279,19 +307,18 @@
             const headers = ['Rank', 'Nombre', 'Ubicación', 'Género', 'Puntos', 'Fecha'];
             submissions.push(headers);
 
-            // Export only visible (filtered) rows, which are ranked
             const visibleRows = Array.from(document.querySelectorAll('#submissionsBody tr'))
                 .filter(row => row.style.display !== 'none');
 
             visibleRows.forEach((row, index) => {
                 const cells = row.querySelectorAll('td');
                 submissions.push([
-                    index + 1, // Rank
-                    cells[1].innerText, // Nombre
-                    cells[2].innerText, // Ubicación
-                    cells[3].innerText, // Género
-                    cells[4].innerText, // Puntos
-                    cells[5].innerText  // Fecha
+                    index + 1, 
+                    cells[1].innerText, 
+                    cells[2].innerText, 
+                    cells[3].innerText, 
+                    cells[4].innerText, 
+                    cells[5].innerText  
                 ]);
             });
 
@@ -306,19 +333,18 @@
             const headers = ['Rank', 'Nombre', 'Ubicación', 'Género', 'Puntos', 'Fecha'];
             submissions.push(headers);
 
-            // Export only visible (filtered) rows, which are ranked
             const visibleRows = Array.from(document.querySelectorAll('#submissionsBody tr'))
                 .filter(row => row.style.display !== 'none');
 
             visibleRows.forEach((row, index) => {
                 const cells = row.querySelectorAll('td');
                 submissions.push([
-                    index + 1, // Rank
-                    cells[1].innerText, // Nombre
-                    cells[2].innerText, // Ubicación
-                    cells[3].innerText, // Género
-                    cells[4].innerText, // Puntos
-                    cells[5].innerText  // Fecha
+                    index + 1, 
+                    cells[1].innerText, 
+                    cells[2].innerText, 
+                    cells[3].innerText, 
+                    cells[4].innerText, 
+                    cells[5].innerText  
                 ]);
             });
 
@@ -328,8 +354,8 @@
             XLSX.writeFile(wb, "Monthly_Rank.xlsx");
         }
 
-        // Load submissions on page load
         window.onload = loadSubmissions;
     </script>
 </body>
 </html>
+
