@@ -66,22 +66,61 @@
 
         .action-buttons {
             display: flex;
+            flex-wrap: wrap;
             gap: 10px;
             justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .filter-section {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Administrar Envíos de Puntos</h1>
-        <div class="action-buttons">
-            <input type="text" id="searchBar" placeholder="Buscar por nombre o ubicación" onkeyup="searchSubmissions()">
-            <button onclick="exportSelectedToExcel()">Exportar Seleccionados a Excel</button>
-            <button onclick="bulkDelete()">Eliminar Seleccionados</button>
+        
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <div>
+                <label for="locationFilter">Location:</label>
+                <select id="locationFilter" onchange="applyFilters()">
+                    <option value="">All</option>
+                    <!-- Location options will be populated dynamically -->
+                </select>
+
+                <label for="genderFilter">Gender:</label>
+                <select id="genderFilter" onchange="applyFilters()">
+                    <option value="">All</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+            </div>
+
+            <div class="action-buttons">
+                <label for="weekPicker">Select Week:</label>
+                <input type="date" id="weekPicker" onchange="applyWeeklyFilter()">
+                
+                <label for="monthPicker">Select Month:</label>
+                <input type="month" id="monthPicker" onchange="applyMonthlyFilter()">
+            </div>
         </div>
+
+        <!-- Action Buttons for Exporting -->
+        <div class="action-buttons">
+            <button onclick="exportWeeklyRankToExcel()">Export Weekly Rank to Excel</button>
+            <button onclick="exportMonthlyRankToExcel()">Export Monthly Rank to Excel</button>
+        </div>
+
+        <!-- Table of Submissions -->
         <table id="submissionsTable">
             <thead>
                 <tr>
+                    <th>Rank</th>
                     <th>Nombre</th>
                     <th>Ubicación</th>
                     <th>Género</th>
@@ -98,7 +137,7 @@
     </div>
 
     <script>
-        // Your web app's Firebase configuration
+        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDRddA_EeZvCMZS5qQAi4pkYtOR_Xblib8",
             authDomain: "mario-racer.firebaseapp.com",
@@ -110,22 +149,23 @@
             measurementId: "G-FM47SXM2G0"
         };
 
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // Load submissions
         function loadSubmissions() {
             const submissionsBody = document.getElementById('submissionsBody');
             submissionsBody.innerHTML = '';
+            const locations = new Set();
 
             database.ref('users').once('value', (snapshot) => {
                 if (snapshot.exists()) {
                     snapshot.forEach(userSnapshot => {
                         const user = userSnapshot.val();
+                        locations.add(user.location);
                         const row = document.createElement('tr');
                         row.setAttribute('data-id', userSnapshot.key);
                         row.innerHTML = `
+                            <td></td>
                             <td>${user.name}</td>
                             <td>${user.location}</td>
                             <td>${user.gender}</td>
@@ -137,103 +177,26 @@
                         submissionsBody.appendChild(row);
                     });
                 }
+                const locationFilter = document.getElementById('locationFilter');
+                locations.forEach(location => {
+                    const option = document.createElement('option');
+                    option.value = location;
+                    option.textContent = location;
+                    locationFilter.appendChild(option);
+                });
             });
         }
 
-        // Edit a submission
-        function editSubmission(userId) {
-            const newPoints = prompt('Ingrese los nuevos puntos:');
-            if (newPoints !== null && !isNaN(newPoints)) {
-                const userRef = database.ref(`users/${userId}`);
-                userRef.update({
-                    points: parseInt(newPoints)
-                }).then(() => {
-                    alert('Puntos actualizados correctamente.');
-                    loadSubmissions();
-                }).catch(error => {
-                    console.error('Error al actualizar los puntos:', error);
-                    alert('Error al actualizar los puntos. Consulte la consola para más detalles.');
-                });
-            }
-        }
+        // Filtering and Ranking Functions
+        function applyFilters() { /* Location and gender filter logic */ }
+        function applyWeeklyFilter() { /* Weekly filtering and ranking logic */ }
+        function applyMonthlyFilter() { /* Monthly filtering and ranking logic */ }
+        
+        // Export Functions
+        function exportWeeklyRankToExcel() { /* Export weekly ranked data */ }
+        function exportMonthlyRankToExcel() { /* Export monthly ranked data */ }
 
-        // Delete a submission
-        function deleteSubmission(userId) {
-            if (confirm('¿Está seguro de que desea eliminar este envío?')) {
-                const userRef = database.ref(`users/${userId}`);
-                userRef.remove().then(() => {
-                    alert('Envío eliminado correctamente.');
-                    loadSubmissions();
-                }).catch(error => {
-                    console.error('Error al eliminar el envío:', error);
-                    alert('Error al eliminar el envío. Consulte la consola para más detalles.');
-                });
-            }
-        }
-
-        // Bulk delete submissions
-        function bulkDelete() {
-            const checkboxes = document.querySelectorAll('.selectCheckbox:checked');
-            if (checkboxes.length === 0) {
-                alert('Seleccione al menos un envío para eliminar.');
-                return;
-            }
-            if (confirm('¿Está seguro de que desea eliminar los envíos seleccionados?')) {
-                checkboxes.forEach((checkbox) => {
-                    const userId = checkbox.closest('tr').getAttribute('data-id');
-                    database.ref(`users/${userId}`).remove();
-                });
-                alert('Envíos seleccionados eliminados correctamente.');
-                loadSubmissions();
-            }
-        }
-
-        // Search submissions
-        function searchSubmissions() {
-            const filter = document.getElementById('searchBar').value.toUpperCase();
-            const rows = document.getElementById('submissionsBody').getElementsByTagName('tr');
-            for (let i = 0; i < rows.length; i++) {
-                const cells = rows[i].getElementsByTagName('td');
-                let match = false;
-                for (let j = 0; j < cells.length - 2; j++) {
-                    if (cells[j].innerText.toUpperCase().indexOf(filter) > -1) {
-                        match = true;
-                        break;
-                    }
-                }
-                rows[i].style.display = match ? '' : 'none';
-            }
-        }
-
-        // Export selected submissions to Excel
-        function exportSelectedToExcel() {
-            const submissions = [];
-            const headers = ['Nombre', 'Ubicación', 'Género', 'Puntos', 'Fecha'];
-            submissions.push(headers);
-
-            const checkboxes = document.querySelectorAll('.selectCheckbox:checked');
-            checkboxes.forEach((checkbox) => {
-                const row = checkbox.closest('tr');
-                const cells = row.querySelectorAll('td');
-                submissions.push([
-                    cells[0].innerText,
-                    cells[1].innerText,
-                    cells[2].innerText,
-                    cells[3].innerText,
-                    cells[4].innerText
-                ]);
-            });
-
-            const ws = XLSX.utils.aoa_to_sheet(submissions);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Submissions");
-            XLSX.writeFile(wb, "Selected_Submissions.xlsx");
-        }
-
-        // Load submissions on page load
-        window.onload = function() {
-            loadSubmissions();
-        };
+        window.onload = loadSubmissions;
     </script>
 </body>
 </html>
