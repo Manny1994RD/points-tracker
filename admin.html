@@ -8,102 +8,202 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <style>
-        /* General Styling */
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f4f9;
-            margin: 0;
-            padding: 20px;
+        /* Root colors based on the provided palette */
+        :root {
+            --light-purple: #b8b8d1;
+            --purple: #5b5f97;
+            --yellow: #ffc145;
+            --white: #fffffb;
+            --red: #ff6b6c;
         }
 
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        /* General styling for minimalist look */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--light-purple);
+            color: var(--purple);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
         }
 
         h1, h2 {
+            color: var(--purple);
+            font-weight: 600;
             text-align: center;
-            color: #333;
         }
 
-        form {
+        .container {
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            max-width: 700px;
+            width: 100%;
+            margin: 20px;
+        }
+
+        .login-form, .container form, .user-list {
             display: flex;
             flex-direction: column;
-            gap: 15px;
-        }
-
-        .form-row {
-            display: flex;
             align-items: center;
-            justify-content: space-between;
-            flex-wrap: nowrap;
+            gap: 20px;
         }
 
-        label {
-            font-size: 1rem;
-            color: #555;
-            flex: 1;
-            white-space: nowrap;
-        }
-
-        input[type="text"], input[type="number"], select {
+        .login-form input, .container input[type="text"], .container input[type="number"], .container select {
+            width: 100%;
+            max-width: 300px;
             padding: 10px;
-            font-size: 1rem;
-            border: 1px solid #ccc;
+            border: 1px solid var(--purple);
             border-radius: 5px;
-            width: 40%;
-            flex: 1;
+            background-color: var(--white);
+            color: var(--purple);
+            font-size: 1rem;
         }
 
-        button {
-            padding: 15px;
-            font-size: 1rem;
-            background-color: #007bff;
-            color: white;
+        .login-form button, .container button {
+            background-color: var(--purple);
+            color: var(--white);
             border: none;
+            padding: 10px 20px;
             border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s;
+            font-size: 1rem;
             width: 100%;
-            margin-top: 20px;
+            max-width: 300px;
         }
 
-        button:hover {
-            background-color: #0056b3;
+        .login-form button:hover, .container button:hover {
+            background-color: var(--yellow);
         }
 
-        .user-list {
-            margin-top: 30px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        .report-tab {
+            background-color: var(--purple);
+            color: var(--white);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        .report-tab:hover {
+            background-color: var(--yellow);
+            color: var(--purple);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
+            font-size: 0.9rem;
         }
 
-        table, th, td {
-            border: 1px solid #ddd;
+        th, td {
+            padding: 10px;
             text-align: center;
-            padding: 8px;
+            border-bottom: 1px solid var(--light-purple);
         }
 
         th {
-            background-color: #007bff;
-            color: white;
+            background-color: var(--purple);
+            color: var(--white);
+        }
+
+        td {
+            background-color: var(--white);
+        }
+
+        .user-list button {
+            background-color: var(--purple);
+            color: var(--white);
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .user-list button:hover {
+            background-color: var(--yellow);
+            color: var(--purple);
+        }
+
+        /* Responsive styling for mobile devices */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+                box-shadow: none;
+            }
+
+            h1, h2 {
+                font-size: 1.5rem;
+                margin: 10px 0;
+            }
+
+            .form-row {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            label, input, select {
+                width: 100%;
+                font-size: 1rem;
+                margin-bottom: 10px;
+            }
+
+            table {
+                font-size: 0.8rem;
+                width: 100%;
+            }
+
+            th, td {
+                padding: 5px;
+                word-break: break-word;
+            }
+
+            .user-list button {
+                padding: 4px 8px;
+                font-size: 0.8rem;
+                margin: 2px;
+            }
+
+            .report-tab {
+                font-size: 0.8rem;
+                padding: 6px 12px;
+                top: 5px;
+                right: 5px;
+            }
+
+            /* Make table scrollable horizontally on smaller screens */
+            .user-list table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <!-- Login Form Section -->
+    <div class="login-form" id="loginForm">
+        <h2>Admin Login</h2>
+        <input type="text" id="username" placeholder="Username" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <button onclick="login()">Login</button>
+    </div>
+
+    <!-- Admin Panel Content -->
+    <div id="adminPanel" class="container" style="display: none;">
+        <a href="https://manny1994rd.github.io/points-tracker/report.html" class="report-tab">Reporte</a>
         <h1>Admin Panel - Gestión de Usuarios</h1>
 
         <!-- Formulario para Crear Nuevo Usuario -->
@@ -155,23 +255,33 @@
     </div>
 
     <script>
-        // Configuración de Firebase
+        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDRddA_EeZvCMZS5qQAi4pkYtOR_Xblib8",
             authDomain: "mario-racer.firebaseapp.com",
             databaseURL: "https://mario-racer-default-rtdb.firebaseio.com",
             projectId: "mario-racer",
-            storageBucket: "mario-racer.appspot.com",
-            messagingSenderId: "373143059252",
-            appId: "1:373143059252:web:5dc28e804781ff688d8361",
-            measurementId: "G-FM47SXM2G0"
+            storageBucket: "mario-racer.firebasestorage.app",
+            appId: "1:373143059252:web:5dc28e804781ff688d8361"
         };
 
-        // Inicializar Firebase
+        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // Crear un nuevo usuario
+        function login() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+
+            if (username === 'admin' && password === '1234') {
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('adminPanel').style.display = 'block';
+                loadUsers(); // Load users after login
+            } else {
+                alert('Incorrect username or password');
+            }
+        }
+
         function createNewUser() {
             const userName = document.getElementById('newUserName').value.trim();
             const userLocation = document.getElementById('newUserLocation').value;
@@ -183,92 +293,81 @@
             }
 
             const newUserRef = database.ref('users').push();
-            newUserRef.set({
-                name: userName,
-                location: userLocation,
-                gender: userGender,
-                points: 0
-            }).then(() => {
-                alert("Nuevo usuario creado correctamente.");
-                loadUsers();
-            }).catch(error => {
-                console.error("Error al crear el usuario:", error);
-                alert("Error al crear el usuario. Consulte la consola para más detalles.");
-            });
+            newUserRef.set({ name: userName, location: userLocation, gender: userGender, points: 0 })
+                .then(() => {
+                    alert("Nuevo usuario creado correctamente.");
+                    document.getElementById('newUserForm').reset();
+                    loadUsers();
+                })
+                .catch(error => alert("Error al crear el usuario."));
         }
 
-        // Cargar usuarios existentes
         function loadUsers() {
             const userListBody = document.getElementById('userListBody');
             userListBody.innerHTML = '';
 
-            database.ref('users').once('value', (snapshot) => {
-                if (snapshot.exists()) {
-                    snapshot.forEach(userSnapshot => {
-                        const user = userSnapshot.val();
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${user.name}</td>
-                            <td>${user.location}</td>
-                            <td>${user.gender}</td>
-                            <td>${user.points}</td>
-                            <td><button onclick="editUser('${userSnapshot.key}', '${user.location}', ${user.points})">Editar</button></td>
-                            <td><button onclick="deleteUser('${userSnapshot.key}')">Eliminar</button></td>
-                        `;
-                        userListBody.appendChild(row);
-                    });
-                }
+            database.ref('users').once('value', snapshot => {
+                snapshot.forEach(userSnapshot => {
+                    const user = userSnapshot.val();
+                    const row = document.createElement('tr');
+                    row.setAttribute('data-user-id', userSnapshot.key);
+                    row.innerHTML = `
+                        <td>${user.name}</td>
+                        <td>${user.location}</td>
+                        <td>${user.gender}</td>
+                        <td>${user.points}</td>
+                        <td><button onclick="editUser('${userSnapshot.key}', '${user.name}', '${user.location}', ${user.points})">Editar</button></td>
+                        <td><button onclick="deleteUser('${userSnapshot.key}')">Eliminar</button></td>
+                    `;
+                    userListBody.appendChild(row);
+                });
             });
         }
 
-        // Editar usuario
-        function editUser(userId, currentLocation, currentPoints) {
-            const editFormHtml = `
-                <div class="form-row">
-                    <label for="editUserLocation">Nueva Ubicación</label>
-                    <select id="editUserLocation">
+        function editUser(userId, currentName, currentLocation, currentPoints) {
+            const row = document.querySelector(`tr[data-user-id="${userId}"]`);
+            row.innerHTML = `
+                <td><input type="text" id="editUserName_${userId}" value="${currentName}"></td>
+                <td>
+                    <select id="editUserLocation_${userId}">
                         <option value="Santiago" ${currentLocation === 'Santiago' ? 'selected' : ''}>Santiago</option>
                         <option value="La Vega" ${currentLocation === 'La Vega' ? 'selected' : ''}>La Vega</option>
                         <option value="Moca" ${currentLocation === 'Moca' ? 'selected' : ''}>Moca</option>
                         <option value="Puerto Plata" ${currentLocation === 'Puerto Plata' ? 'selected' : ''}>Puerto Plata</option>
                         <option value="Jarabacoa" ${currentLocation === 'Jarabacoa' ? 'selected' : ''}>Jarabacoa</option>
                     </select>
-                </div>
-                <div class="form-row">
-                    <label for="editUserPoints">Nuevos Puntos</label>
-                    <input type="number" id="editUserPoints" value="${currentPoints}">
-                </div>
-                <button type="button" onclick="saveUserEdit('${userId}')">Guardar Cambios</button>
+                </td>
+                <td>${row.children[2].innerHTML}</td>
+                <td><input type="number" id="editUserPoints_${userId}" value="${currentPoints}"></td>
+                <td><button onclick="saveUserEdit('${userId}')">Guardar</button></td>
+                <td><button onclick="deleteUser('${userId}')">Eliminar</button></td>
             `;
-
-            const userListBody = document.getElementById('userListBody');
-            userListBody.innerHTML = editFormHtml;
         }
 
-        // Guardar los cambios del usuario editado
         function saveUserEdit(userId) {
-            const newLocation = document.getElementById('editUserLocation').value;
-            const newPoints = parseInt(document.getElementById('editUserPoints').value) || 0;
+            const newName = document.getElementById(`editUserName_${userId}`).value.trim();
+            const newLocation = document.getElementById(`editUserLocation_${userId}`).value;
+            const newPoints = parseInt(document.getElementById(`editUserPoints_${userId}`).value) || 0;
 
-            if (!newLocation) {
-                alert("Ubicación no puede estar vacía.");
+            if (!newName) {
+                alert("El nombre no puede estar vacío.");
                 return;
             }
 
             const userRef = database.ref(`users/${userId}`);
             userRef.update({
+                name: newName,
                 location: newLocation,
                 points: newPoints
             }).then(() => {
                 alert("Datos del usuario actualizados.");
-                loadUsers();
+                loadUsers(); // Reload users to refresh the table view
             }).catch(error => {
                 console.error("Error al actualizar los datos del usuario:", error);
                 alert("Error al actualizar los datos del usuario. Consulte la consola para más detalles.");
             });
         }
 
-        // Eliminar usuario
         function deleteUser(userId) {
             const confirmation = confirm('¿Está seguro de que desea eliminar este usuario?');
             if (confirmation) {
@@ -284,8 +383,11 @@
             }
         }
 
-        // Cargar usuarios al cargar la página
-        window.onload = loadUsers;
+        window.onload = function() {
+            if (document.getElementById('adminPanel').style.display === 'block') {
+                loadUsers();
+            }
+        };
     </script>
 </body>
 </html>
